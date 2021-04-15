@@ -67,6 +67,10 @@ void changeSettings() {
     
 }
 
+void menu() {
+    
+}
+
 
 void homeScreen(){
     uLCD.cls();
