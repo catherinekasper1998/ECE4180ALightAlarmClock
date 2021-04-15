@@ -25,6 +25,48 @@ DigitalIn leftPB(p18);
 DigitalIn rightPB(p19);
 DigitalIn centerPB(p20);
 
+//enums
+typedef enum {
+    SLEEP           = 0;
+    COLOR_WHEEL     = 1;
+    RAINBOW         = 2;
+    LIGHT           = 3;
+    OFF             = 4:
+} Mode;
+
+typedef enum {
+    RED             = 0xFF0000;
+    ORGANGE         = 0xFFA500;
+    YELLOW          = 0xFFFF00;
+    GREEN           = 0x00FF00;
+    BLUE            = 0x0000FF;
+    PURPLE          = 0xFF00FF;
+    PINK            = 0xFF00FF;
+    WHITE           = 0xFFFFFF;
+} Color;
+
+
+//Global Settings
+time_t LOCAL_TIME;
+time_t ALARM_TIME;
+int SNOOZE_DURATION_MIN = 5;
+int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
+Mode CURRENT_MODE = OFF;
+Color RAINBOW_COLOR = WHITE;
+
+
+//screen options
+
+
+void viewSettings() {
+
+}
+
+//page that allows the user to edit all of the different 
+void changeSettings() {
+    
+}
+
 
 void homeScreen(){
     uLCD.cls();
