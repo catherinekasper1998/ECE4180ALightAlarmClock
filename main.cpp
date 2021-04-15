@@ -25,49 +25,136 @@ DigitalIn leftPB(p18);
 DigitalIn rightPB(p19);
 DigitalIn centerPB(p20);
 
-//enums
-typedef enum {
-    SLEEP           = 0;
-    COLOR_WHEEL     = 1;
-    RAINBOW         = 2;
-    LIGHT           = 3;
-    OFF             = 4:
-} Mode;
+//Modes
+#define SLEEP       0
+#define COLOR_WHEEL 1
+#define RAINBOW     2
+#define LIGHT_ON    3
+#define LIGHT_OFF   4
 
-typedef enum {
-    RED             = 0xFF0000;
-    ORGANGE         = 0xFFA500;
-    YELLOW          = 0xFFFF00;
-    GREEN           = 0x00FF00;
-    BLUE            = 0x0000FF;
-    PURPLE          = 0xFF00FF;
-    PINK            = 0xFF00FF;
-    WHITE           = 0xFFFFFF;
-} Color;
-
+//Colors
+#define RED     0xFF0000
+#define ORANGE  0xFFFFFF
+#define YELLOW  0x000000
+#define GREEN   0x00FF00
+#define BLUE    0x0000FF
+#define PURPLE  0xBFBFBF
+#define WHITE   0xFFFFFF
+#define BLACK   0x000000
+#define LGREY   0xBFBFBF
+#define DGREY   0x5F5F5F
 
 //Global Settings
 time_t LOCAL_TIME;
 time_t ALARM_TIME;
 int SNOOZE_DURATION_MIN = 5;
 int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
-Mode CURRENT_MODE = OFF;
-Color RAINBOW_COLOR = WHITE;
+int CURRENT_MODE = OFF;
+int RAINBOW_COLOR = WHITE;
 
 
-//screen options
+//page that allows the user to edit all of the different 
+void viewSettingsScreen() {
 
+    // Set up
+    uLCD.cls();
+    uLCD.color(WHITE);
+    uLCD.text_width(1); // size text
+    uLCD.text_height(1.25);
+    uLCD.locate(0,0);
+    uLCD.printf("VIEW SETTINGS\n\n");
 
-void viewSettings() {
+    //ALARM TIME Line 1
+    uLCD.printf("Alarm: ");
+    //UPDATE WITH VARS
+    uLCD.printf("00:00");
+    uLCD.printf("am");
+    uLCD.printf("\n\n");
+    
+    //LOCAL TIME Line 2
+    uLCD.printf("Local: ");
+    //UPDATE WITH VARS
+    uLCD.printf("00:00");
+    uLCD.printf("am");
+    uLCD.printf("\n\n");
+    
+    //SNOOZE DURATION Line 3
+    uLCD.printf("Snooze Dur: ");
+    //UPDATE WITH VARS
+    uLCD.printf("00");
+    uLCD.printf("min");
+    uLCD.printf("\n\n");
 
+    //SUNSET/SUNRISE DURATION Line 4
+    uLCD.printf("Sunset Dur: ");
+    //UPDATE WITH VARS
+    uLCD.printf("30");
+    uLCD.printf("min");
+    uLCD.printf("\n\n");
+
+    //SUNSET/SUNRISE DURATION Line 5
+    uLCD.printf("Mode: ");
+    //UPDATE WITH VARS
+    uLCD.printf("SLEEP");
+    uLCD.printf("\n\n");
+
+    //SUNSET/SUNRISE DURATION Bottom Line
+    uLCD.locate(0,15);
+    uLCD.printf("Back");
+    //UPDATE WITH VARS
 }
 
 //page that allows the user to edit all of the different 
-void changeSettings() {
+void changeSettingsScreen() {
+    // Set up
+    uLCD.cls();
+    uLCD.color(WHITE);
+    uLCD.text_width(1); // size text
+    uLCD.text_height(1.25);
+    uLCD.locate(0,0);
+    uLCD.printf("CHANGE SETTINGS\n\n");
+
+    //ALARM TIME Line 1
+    uLCD.printf("Alarm: ");
+    //UPDATE WITH VARS
+    uLCD.printf("00:00");
+    uLCD.printf("am");
+    uLCD.printf("\n\n");
     
+    //LOCAL TIME Line 2
+    uLCD.printf("Local: ");
+    //UPDATE WITH VARS
+    uLCD.printf("00:00");
+    uLCD.printf("am");
+    uLCD.printf("\n\n");
+    
+    //SNOOZE DURATION Line 3
+    uLCD.printf("Snooze Dur: ");
+    //UPDATE WITH VARS
+    uLCD.printf("00");
+    uLCD.printf("min");
+    uLCD.printf("\n\n");
+
+    //SUNSET/SUNRISE DURATION Line 4
+    uLCD.printf("Sunset Dur: ");
+    //UPDATE WITH VARS
+    uLCD.printf("30");
+    uLCD.printf("min");
+    uLCD.printf("\n\n");
+
+    //SUNSET/SUNRISE DURATION Line 5
+    uLCD.printf("Mode: ");
+    //UPDATE WITH VARS
+    uLCD.printf("SLEEP");
+    uLCD.printf("\n\n");
+
+    //SUNSET/SUNRISE DURATION Bottom Line
+    uLCD.locate(0,15);
+    uLCD.printf("Back");
+    //UPDATE WITH VARS
 }
 
-void menu() {
+void menuScreen() {
     
 }
 
@@ -107,8 +194,9 @@ int main() {
     uLCD.cls();
     uLCD.baudrate(BAUD_3000000); //jack up baud rate to max for fast display
     wait(1.0);
-    homeScreen();
+    changeSettingsScreen();
     while(1) {
 
     }
 }
+
