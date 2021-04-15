@@ -1,11 +1,9 @@
 #include "mbed.h"
-#include "mbed.h"
 #include "uLCD_4DGL.h"
 
 /*
 Final Project for 4180.
 A light alarm clock with custom sunrise/sunset settings
-
 */
 //LCD screen
 uLCD_4DGL uLCD(p9,p10,p11); // serial tx, serial rx, reset pin;
@@ -25,55 +23,70 @@ DigitalIn leftPB(p18);
 DigitalIn rightPB(p19);
 DigitalIn centerPB(p20);
 
-//enums
-typedef enum {
-    SLEEP           = 0;
-    COLOR_WHEEL     = 1;
-    RAINBOW         = 2;
-    LIGHT           = 3;
-    OFF             = 4:
-} Mode;
+//Modes
+#define SLEEP       0
+#define COLOR_WHEEL 1
+#define RAINBOW     2
+#define LIGHT_ON    3
+#define LIGHT_OFF   4
 
-typedef enum {
-    RED             = 0xFF0000;
-    ORGANGE         = 0xFFA500;
-    YELLOW          = 0xFFFF00;
-    GREEN           = 0x00FF00;
-    BLUE            = 0x0000FF;
-    PURPLE          = 0xFF00FF;
-    PINK            = 0xFF00FF;
-    WHITE           = 0xFFFFFF;
-} Color;
-
+//Colors
+#define RED     0xFF0000
+#define ORANGE  0xFFFFFF
+#define YELLOW  0x000000
+#define GREEN   0x00FF00
+#define BLUE    0x0000FF
+#define PURPLE  0xBFBFBF
+#define WHITE   0xFFFFFF
+#define BLACK   0x000000
+#define LGREY   0xBFBFBF
+#define DGREY   0x5F5F5F
 
 //Global Settings
 time_t LOCAL_TIME;
 time_t ALARM_TIME;
 int SNOOZE_DURATION_MIN = 5;
 int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
-Mode CURRENT_MODE = OFF;
-Color RAINBOW_COLOR = WHITE;
+int CURRENT_MODE = OFF;
+int RAINBOW_COLOR = WHITE;
 
 
 //screen options
 
 
-void viewSettings() {
+void viewSettingsScreen() {
 
 }
 
 //page that allows the user to edit all of the different 
-void changeSettings() {
+void changeSettingsScreen() {
     
 }
 
-void menu() {
-    
+void menuScreen() {
+    uLCD.color(WHITE);
+    //VIEW SETTINGS
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,1);
+    uLCD.printf("View Settings");
+    //CHANGE SETTINGS
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,4);
+    uLCD.printf("Change Settings");
+    //BACK
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,14);
+    uLCD.printf("Back");
+    //CURSOR
+    //NEED SOMETHING FOR SELECTING
 }
 
 
 void homeScreen(){
-    uLCD.cls();
+    
     uLCD.color(WHITE);
     //ALARM
     uLCD.text_width(1.25); //4X size text
@@ -87,17 +100,20 @@ void homeScreen(){
     //TIME
     uLCD.text_width(2.5); //4X size text
     uLCD.text_height(2.5);
-    uLCD.locate(1.5,2.5);
-    //UPDATE WITH VARS
-    uLCD.printf("12:00");
-    uLCD.printf("am");
-    
+    uLCD.locate(1,2.5);
+    //Pull current time and set it to a charArray
+    char curTime[32];
+    strftime(curTime, 32, "%I:%M %p\n", localtime(&LOCAL_TIME));
+    uLCD.printf("%s", curTime);
+    //DEBUG
+    printf("\r\n%s", curTime);
+    //END DEBUG
     //MENU/MODE
     uLCD.text_width(1.25); //4X size text
     uLCD.text_height(1.25);
-    uLCD.locate(2,14);
+    uLCD.locate(1,14);
     uLCD.printf("Menu");
-    uLCD.locate(9,14);
+    uLCD.locate(8,14);
     uLCD.printf("Mode: ");
     //GET MODE
     uLCD.printf("mode");
@@ -107,8 +123,13 @@ int main() {
     uLCD.cls();
     uLCD.baudrate(BAUD_3000000); //jack up baud rate to max for fast display
     wait(1.0);
-    homeScreen();
+    
+    set_time(0);
+    
     while(1) {
-
+        LOCAL_TIME = time(NULL);
+        wait(1.0);
+        homeScreen();
     }
 }
+
