@@ -27,7 +27,6 @@ DigitalIn centerPB(p20);
 
 
 int main() {
-    uLCD.display_control(PORTRAIT);
     uLCD.cls();
     uLCD.baudrate(BAUD_3000000); //jack up baud rate to max for fast display
     wait(1.0);
