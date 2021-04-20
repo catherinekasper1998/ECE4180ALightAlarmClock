@@ -1,5 +1,4 @@
 #include "mbed.h"
-#include "mbed.h"
 #include "uLCD_4DGL.h"
 
 /*
@@ -70,12 +69,14 @@ void updateCursor(){
     // UPDATE THE PAGE AND INDEX BEFORE CALLING THIS FUNCTION
     // This function does handle line being "out of bounds" 
     // and reassigns a "wrapped around value" its proper line
+    pc.printf(" Circle Location (x: %d , y: %d)\n" , cursor_x, cursor_y);
 
     uLCD.filled_circle(cursor_x, cursor_y, cursor_radius, BLACK);
 
     switch (page) {
 
         case MAIN:              // line should ever only be 0
+            pc.printf("in main\n");
             wait_ms(500);      // flash the circle so people know that it is active
             cursor_x = 20;        // does not change
             cursor_y = 20;        // does not change
@@ -123,28 +124,12 @@ void updateCursor(){
             }
             break;
         
-        case VIEW_SETTINGS:
-            if (line == 0 | line > 6 ) {            // Alarm Time
-                cursor_x = 4;
-                cursor_y = 19;
-                line = 0;
-            } else if (line == 1) {     // Snooze Time
-                cursor_x = 4;
-                cursor_y = 19 + 16;
-            } else if (line == 2) {     // Local Time
-                cursor_x = 4;
-                cursor_y = 19 + 16 * 2;
-            } else if (line == 3) {     // Sunrise/Sunset Time
-                cursor_x = 4;
-                cursor_y = 19 + 16 * 2;
-            } else if (line == 4) {     // Current Mode
-                cursor_x = 4;
-                cursor_y = 19 + 16 * 3;
-            } else if (line == 5 | line < 0) {     // Back & Save
-                cursor_x = 4;
-                cursor_y = 115;
-                line = 5;
-            }
+        case VIEW_SETTINGS: // SHOULD ONLY EVER BE 0
+            pc.printf("in view settings");
+            wait_ms(500);
+            cursor_y = 3;
+            cursor_y = 123;
+            line = 0;
             break;
         
         default:
@@ -202,10 +187,14 @@ void viewSettingsScreen() {
 
     //SUNSET/SUNRISE DURATION Bottom Line
     uLCD.locate(0,15);
-    uLCD.printf("Back");
+    uLCD.printf(" Back");
     //UPDATE WITH VARS
     
+    cursor_y = 3;
+    cursor_y = 123;
+    page = VIEW_SETTINGS;
     updateCursor();
+    line = 0;
 }
 
 //page that allows the user to edit all of the different 
@@ -221,7 +210,6 @@ void changeSettingsScreen() {
     uLCD.locate(0,0);
     uLCD.printf("CHANGE SETTINGS\n\n");
     
-    uLCD.filled_circle(cursor_x, cursor_y, cursor_radius, cursor_color);
 
     //ALARM TIME Line 1
     uLCD.printf(" Alarm: ");
@@ -305,7 +293,7 @@ void homeScreen(){
 
 
 int main() {
-    // 
+    // ahh
     uLCD.cls();
     uLCD.baudrate(BAUD_3000000); //jack up baud rate to max for fast display
 
@@ -318,7 +306,8 @@ int main() {
     centerPB.mode(PullUp);
 
     wait(1.0);
-    changeSettingsScreen();
+    viewSettingsScreen();
+    
     while(1) {
         //pc.printf("page: %d line: %d \n", page, line);
         if (downPB == 0) {
