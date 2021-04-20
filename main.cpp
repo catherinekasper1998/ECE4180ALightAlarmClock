@@ -9,6 +9,7 @@ A light alarm clock with custom sunrise/sunset settings
 */
 //LCD screen
 uLCD_4DGL uLCD(p9,p10,p11); // serial tx, serial rx, reset pin;
+Serial pc(USBTX, USBRX); // tx, rx
 
 //mbed LEDs
 DigitalOut led1(LED1);
@@ -32,6 +33,14 @@ DigitalIn centerPB(p20);
 #define LIGHT_ON    3
 #define LIGHT_OFF   4
 
+// Pages & Lines
+#define MAIN        6
+#define MENU        7
+#define CHANGE_SETTINGS 8
+#define VIEW_SETTINGS   9
+int page = MAIN;
+int line = 0; // value from 0 to n-1 where n = the number of lines on the menu page
+
 //Colors
 #define RED     0xFF0000
 #define ORANGE  0xFFFFFF
@@ -51,6 +60,99 @@ int SNOOZE_DURATION_MIN = 5;
 int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
 int CURRENT_MODE = OFF;
 int RAINBOW_COLOR = WHITE;
+
+int cursor_x = 4;
+int cursor_y = 19;
+int cursor_radius = 2;
+int cursor_color = RED;
+
+void updateCursor(){ 
+    // UPDATE THE PAGE AND INDEX BEFORE CALLING THIS FUNCTION
+    // This function does handle line being "out of bounds" 
+    // and reassigns a "wrapped around value" its proper line
+
+    uLCD.filled_circle(cursor_x, cursor_y, cursor_radius, BLACK);
+
+    switch (page) {
+
+        case MAIN:              // line should ever only be 0
+            wait_ms(500);      // flash the circle so people know that it is active
+            cursor_x = 20;        // does not change
+            cursor_y = 20;        // does not change
+            line = 0;
+            break;
+        
+        case MENU:
+            if (line == 0 | line > 2) {            // View Settings
+                cursor_x = 4;
+                cursor_y = 19;
+                line = 0;
+            } else if (line == 1) {     // Change Settings
+                cursor_x = 4;
+                cursor_y = 19 + 16;
+            } else if (line == 2 | line < 0) {     // Back
+                cursor_x = 4;
+                cursor_y = 115;
+                line = 2;
+            } else {
+                // ERROR!
+            }
+            break;
+        
+        case CHANGE_SETTINGS:
+            if (line == 0 | line > 6) { // Alarm Time
+                cursor_x = 4;
+                cursor_y = 19;
+                line = 0;
+            } else if (line == 1) {     // Snooze Time
+                cursor_x = 4;
+                cursor_y = 19 + 16;
+            } else if (line == 2) {     // Local Time
+                cursor_x = 4;
+                cursor_y = 19 + 16 * 2;
+            } else if (line == 3) {     // Sunrise/Sunset Time
+                cursor_x = 4;
+                cursor_y = 19 + 16 * 3;
+            } else if (line == 4) {     // Current Mode
+                cursor_x = 4;
+                cursor_y = 19 + 16 * 4;
+            } else if (line == 5 | line < 0) {     // Back & Save
+                cursor_x = 4;
+                cursor_y = 122;
+                line = 5;
+            }
+            break;
+        
+        case VIEW_SETTINGS:
+            if (line == 0 | line > 6 ) {            // Alarm Time
+                cursor_x = 4;
+                cursor_y = 19;
+                line = 0;
+            } else if (line == 1) {     // Snooze Time
+                cursor_x = 4;
+                cursor_y = 19 + 16;
+            } else if (line == 2) {     // Local Time
+                cursor_x = 4;
+                cursor_y = 19 + 16 * 2;
+            } else if (line == 3) {     // Sunrise/Sunset Time
+                cursor_x = 4;
+                cursor_y = 19 + 16 * 2;
+            } else if (line == 4) {     // Current Mode
+                cursor_x = 4;
+                cursor_y = 19 + 16 * 3;
+            } else if (line == 5 | line < 0) {     // Back & Save
+                cursor_x = 4;
+                cursor_y = 115;
+                line = 5;
+            }
+            break;
+        
+        default:
+            break;
+    }
+    uLCD.filled_circle(cursor_x, cursor_y, cursor_radius, cursor_color);
+
+}
 
 
 //page that allows the user to edit all of the different 
@@ -102,56 +204,65 @@ void viewSettingsScreen() {
     uLCD.locate(0,15);
     uLCD.printf("Back");
     //UPDATE WITH VARS
+    
+    updateCursor();
 }
 
 //page that allows the user to edit all of the different 
 void changeSettingsScreen() {
-    // Set up
+    page = CHANGE_SETTINGS;
+    line = 0;
+
+        // Set up
     uLCD.cls();
     uLCD.color(WHITE);
     uLCD.text_width(1); // size text
     uLCD.text_height(1.25);
     uLCD.locate(0,0);
     uLCD.printf("CHANGE SETTINGS\n\n");
+    
+    uLCD.filled_circle(cursor_x, cursor_y, cursor_radius, cursor_color);
 
     //ALARM TIME Line 1
-    uLCD.printf("Alarm: ");
+    uLCD.printf(" Alarm: ");
     //UPDATE WITH VARS
     uLCD.printf("00:00");
     uLCD.printf("am");
     uLCD.printf("\n\n");
     
     //LOCAL TIME Line 2
-    uLCD.printf("Local: ");
+    uLCD.printf(" Local: ");
     //UPDATE WITH VARS
     uLCD.printf("00:00");
     uLCD.printf("am");
     uLCD.printf("\n\n");
     
     //SNOOZE DURATION Line 3
-    uLCD.printf("Snooze Dur: ");
+    uLCD.printf(" Snooze Dur: ");
     //UPDATE WITH VARS
     uLCD.printf("00");
     uLCD.printf("min");
-    uLCD.printf("\n\n");
+    uLCD.printf("\n");
 
     //SUNSET/SUNRISE DURATION Line 4
-    uLCD.printf("Sunset Dur: ");
+    uLCD.printf(" Sunset Dur: ");
     //UPDATE WITH VARS
     uLCD.printf("30");
     uLCD.printf("min");
-    uLCD.printf("\n\n");
+    uLCD.printf("\n");
 
     //SUNSET/SUNRISE DURATION Line 5
-    uLCD.printf("Mode: ");
+    uLCD.printf(" Mode: ");
     //UPDATE WITH VARS
     uLCD.printf("SLEEP");
     uLCD.printf("\n\n");
 
     //SUNSET/SUNRISE DURATION Bottom Line
     uLCD.locate(0,15);
-    uLCD.printf("Back");
+    uLCD.printf(" Back & Save");
     //UPDATE WITH VARS
+    
+    updateCursor();
 }
 
 void menuScreen() {
@@ -188,14 +299,41 @@ void homeScreen(){
     uLCD.printf("Mode: ");
     //GET MODE
     uLCD.printf("mode");
+    
+    updateCursor();
 }
 
+
 int main() {
+    // 
     uLCD.cls();
     uLCD.baudrate(BAUD_3000000); //jack up baud rate to max for fast display
+
+    snoozePB.mode(PullUp);
+    sleepPB.mode(PullUp);
+    upPB.mode(PullUp);
+    downPB.mode(PullUp);
+    leftPB.mode(PullUp);
+    rightPB.mode(PullUp);
+    centerPB.mode(PullUp);
+
     wait(1.0);
     changeSettingsScreen();
     while(1) {
+        //pc.printf("page: %d line: %d \n", page, line);
+        if (downPB == 0) {
+            pc.printf("Down\n");
+            pc.printf("page: %d line: %d \n", page, line);
+            line++;
+            updateCursor();
+            wait_ms(500);
+        } else if(upPB == 0) {
+            pc.printf("Up\n");
+            pc.printf("page: %d line: %d \n", page, line);
+            line--;
+            updateCursor();
+            wait_ms(500);
+        }
 
     }
 }
