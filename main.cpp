@@ -30,6 +30,15 @@ DigitalIn centerPB(p20);
 #define LIGHT_ON    3
 #define LIGHT_OFF   4
 
+// Pages & Lines
+#define MAIN        6
+#define MENU        7
+#define CHANGE_SETTINGS 8
+#define VIEW_SETTINGS   9
+int page = MAIN;
+int line = 0; // value from 0 to n-1 where n = the number of lines on the menu page
+
+
 //Colors
 #define RED     0xFF0000
 #define ORANGE  0xFFFFFF
