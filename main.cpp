@@ -128,6 +128,33 @@ void homeScreen(){
     uLCD.printf("mode");
 }
 
+void editVariable(){
+    //ALARM AND LOCAL
+    //hour location
+    uLCD.locate(8,2);
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(8,2);
+    uLCD.printf("12");
+    wait(0.5);
+    
+    //min location
+    uLCD.locate(11,2);
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(11,2);
+    uLCD.printf("59");
+    wait(0.5);
+    
+    //am/pm
+    uLCD.locate(13,2);
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(13,2);
+    uLCD.printf("am");
+    wait(0.5);
+}
+
 int main() {
     uLCD.cls();
     uLCD.baudrate(BAUD_3000000); //jack up baud rate to max for fast display
