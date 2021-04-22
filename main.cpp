@@ -90,10 +90,10 @@ void updateCursor(){
                 line = 0;
             } else if (line == 1) {     // Change Settings
                 cursor_x = 4;
-                cursor_y = 19 + 16;
+                cursor_y = 19 + 24;
             } else if (line == 2 | line < 0) {     // Back
                 cursor_x = 4;
-                cursor_y = 115;
+                cursor_y = 123;
                 line = 2;
             } else {
                 // ERROR!
@@ -142,6 +142,8 @@ void updateCursor(){
 
 //page that allows the user to edit all of the different 
 void viewSettingsScreen() {
+    page = VIEW_SETTINGS;
+    line = 0;
 
     // Set up
     uLCD.cls();
@@ -254,11 +256,41 @@ void changeSettingsScreen() {
 }
 
 void menuScreen() {
+    page = MENU;
+    line = 0;
+
+    uLCD.cls();
+    uLCD.color(WHITE);
+    //VIEW SETTINGS
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+
+    uLCD.locate(0,0);
+    uLCD.printf("MENU");
     
+    uLCD.locate(1,2);
+    uLCD.printf("View Settings");
+    //CHANGE SETTINGS
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,5);
+    uLCD.printf("Change Settings");
+    //BACK
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,15);
+    uLCD.printf("Back");
+    //CURSOR
+    //NEED SOMETHING FOR SELECTING
+    page = MENU;
+    updateCursor();
 }
 
 
 void homeScreen(){
+    page = MAIN;
+    line = 0;
+    
     uLCD.cls();
     uLCD.color(WHITE);
     //ALARM
@@ -292,6 +324,35 @@ void homeScreen(){
 }
 
 
+void selection() {
+    switch (page) {
+        case MAIN:
+            pc.printf("MAIN to MENU \n");
+            menuScreen();
+            break;
+        case MENU:
+            pc.printf("MENU to ");
+            if (line == 0) {
+                pc.printf("VIEW SETTINGS\n");
+                viewSettingsScreen();
+            } else if (line == 1) {
+                pc.printf("CHANGE SETTINGS\n");
+                changeSettingsScreen();
+            } else {
+                pc.printf("MAIN\n");
+                homeScreen();
+            }
+            break;
+        case VIEW_SETTINGS:
+            break;
+        case CHANGE_SETTINGS:
+            break;
+        default:
+            break;
+    }
+}
+
+
 int main() {
     // ahh
     uLCD.cls();
@@ -306,7 +367,7 @@ int main() {
     centerPB.mode(PullUp);
 
     wait(1.0);
-    viewSettingsScreen();
+    homeScreen();
     
     while(1) {
         //pc.printf("page: %d line: %d \n", page, line);
@@ -316,12 +377,16 @@ int main() {
             line++;
             updateCursor();
             wait_ms(500);
-        } else if(upPB == 0) {
+        } else if (upPB == 0) {
             pc.printf("Up\n");
             pc.printf("page: %d line: %d \n", page, line);
             line--;
             updateCursor();
             wait_ms(500);
+        } else if (centerPB == 0) {
+            pc.printf("Center\n");
+            pc.printf("Page : %d line: %d\n", page, line);
+            selection();
         }
 
     }
