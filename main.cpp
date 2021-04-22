@@ -578,6 +578,8 @@ int main() {
     uLCD.cls();
     uLCD.baudrate(BAUD_3000000); //jack up baud rate to max for fast display
 
+    set_time(0);                //set the time to 0 or 12:00am to begin
+
     snoozePB.mode(PullUp);
     sleepPB.mode(PullUp);
     upPB.mode(PullUp);
@@ -590,6 +592,8 @@ int main() {
     homeScreen();
     
     while(1) {
+        LOCAL_TIME = time(NULL);            //update local time
+
         //pc.printf("page: %d line: %d \n", page, line);
         if (downPB == 0) {
             pc.printf("Down\n");
@@ -609,25 +613,5 @@ int main() {
             selection();
         }
 
-    
-    //set the time to 0 or 12:00am to begin
-    set_time(0);
-    
-    snoozePB.mode(PullUp);
-    sleepPB.mode(PullUp);
-    upPB.mode(PullUp);
-    downPB.mode(PullUp);
-    leftPB.mode(PullUp);
-    rightPB.mode(PullUp);
-    centerPB.mode(PullUp);
-    
-    changeSettingsScreen();
-    while(1) {
-        //update local time
-        LOCAL_TIME = time(NULL);
-        //editVariable();
-        //wait(1.0);
-        //homeScreen();
-    }
 }
 
