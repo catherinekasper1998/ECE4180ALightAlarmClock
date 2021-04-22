@@ -172,30 +172,121 @@ void homeScreen(){
 }
 
 void editVariable(){
-    //ALARM AND LOCAL
-    //hour location
-    uLCD.locate(8,2);
-    uLCD.printf("  ");
-    wait(0.5);
-    uLCD.locate(8,2);
-    uLCD.printf("12");
-    wait(0.5);
-    
-    //min location
-    uLCD.locate(11,2);
-    uLCD.printf("  ");
-    wait(0.5);
-    uLCD.locate(11,2);
-    uLCD.printf("59");
-    wait(0.5);
-    
-    //am/pm
-    uLCD.locate(13,2);
-    uLCD.printf("  ");
-    wait(0.5);
-    uLCD.locate(13,2);
-    uLCD.printf("am");
-    wait(0.5);
+        //if statements are just to test certain lines
+    //ALARM TIME LOCATION
+    if(0){
+        //hour location
+        uLCD.locate(8,2);
+        
+        uLCD.printf("  ");
+        wait(0.5);
+        uLCD.locate(8,2);
+        uLCD.printf("12");
+        wait(0.5);
+        
+        //min location
+        uLCD.locate(11,2);
+        
+        uLCD.printf("  ");
+        wait(0.5);
+        uLCD.locate(11,2);
+        uLCD.printf("59");
+        wait(0.5);
+        
+        //am/pm
+        uLCD.locate(13,2);
+        
+        uLCD.printf("  ");
+        wait(0.5);
+        uLCD.locate(13,2);
+        uLCD.printf("am");
+        wait(0.5);
+    }
+    //LOCAL TIME LOCATION
+    if(0){
+        //hour location
+        uLCD.locate(8,4);
+        
+        uLCD.printf("  ");
+        wait(0.5);
+        uLCD.locate(8,4);
+        uLCD.printf("12");
+        wait(0.5);
+        
+        //min location
+        uLCD.locate(11,4);
+        
+        uLCD.printf("  ");
+        wait(0.5);
+        uLCD.locate(11,4);
+        uLCD.printf("59");
+        wait(0.5);
+        
+        //am/pm
+        uLCD.locate(13,4);
+        
+        uLCD.printf("  ");
+        wait(0.5);
+        uLCD.locate(13,4);
+        uLCD.printf("am");
+        wait(0.5);
+    }
+    //SNOOZE DUR LOCATION
+    if(0){
+        //min location
+        uLCD.locate(13,6);
+        
+        uLCD.printf("  ");
+        wait(0.5);
+        uLCD.locate(13,6);
+        uLCD.printf("15");
+        wait(0.5);
+    }
+    //SUNSET DUR LOCATION
+    if(0){
+        //min location
+        uLCD.locate(13,8);
+        
+        uLCD.printf("  ");
+        wait(0.5);
+        uLCD.locate(13,8);
+        uLCD.printf("30");
+        wait(0.5);
+    }
+    //MODE LOCATION
+    if(1){
+        for(int modeInt = 0; modeInt < 5; modeInt++){
+            //min location
+            uLCD.locate(7,10);
+            
+            //clear line before printing next one
+            uLCD.printf("           ");
+            
+            wait(1);
+            uLCD.locate(7,10);
+            switch(modeInt){
+                case SLEEP:
+                    uLCD.printf("Sleep");
+                    break;
+                case COLOR_WHEEL:
+                    uLCD.printf("Color Wheel");
+                    break;
+                case RAINBOW:
+                    uLCD.printf("Rainbow");
+                    break;
+                case LIGHT_ON:
+                    uLCD.printf("Light On");
+                    break;
+                case LIGHT_OFF:
+                    uLCD.printf("Light Off");
+                    break;
+                default:
+                    uLCD.printf("n/a");
+                    break;
+            }//end switch
+            wait(1);
+        }//end for
+    }//end if
 }
 
 int main() {
