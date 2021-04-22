@@ -346,6 +346,26 @@ void homeScreen(){
     updateCursor();
 }
 
+void updatingAlarm() {
+
+}
+
+void updatingLocal() {
+
+}
+
+void updatingSnooze() {
+
+}
+
+void updatingSun() {
+
+}
+
+void updatingMode() {
+    
+}
+
 
 void selection() {
     switch (page) {
@@ -374,19 +394,19 @@ void selection() {
             pc.printf("CHANGE SETTINGS to ");
             if (line == 0) {
                 pc.printf("ALARM TIME\n");
-                //updatingAlarm();
+                updatingAlarm();
             } else if (line == 1) {
                 pc.printf("LOCAL TIME \n");
-                //updatingLocal();
+                updatingLocal();
             } else if (line == 2) {
                 pc.printf("SNOOZE DUR \n");
-                //updatingSnooze();
+                updatingSnooze();
             } else if (line == 3) {
                 pc.printf("SUN DUR \n");
-                //updatingSun();
+                updatingSun();
             } else if (line == 4) {
                 pc.printf("Mode \n");
-                //updatingSnooze();
+                updatingMode();
             } else if (line == 5) {
                 pc.printf("BACK & SAVE \n");
                 menuScreen();
