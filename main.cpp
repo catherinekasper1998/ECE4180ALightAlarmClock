@@ -96,36 +96,79 @@ void menuScreen() {
 
 void homeScreen(){
     
+        uLCD.color(WHITE);
+    //VIEW SETTINGS
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,1);
+    uLCD.printf("View Settings");
+    //CHANGE SETTINGS
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,4);
+    uLCD.printf("Change Settings");
+    //BACK
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,14);
+    uLCD.printf("Back");
+    //CURSOR
+    //NEED SOMETHING FOR SELECTING
+}
+
+
+void homeScreen(){
+    
     uLCD.color(WHITE);
     //ALARM
-    uLCD.text_width(1.25); //4X size text
+    uLCD.text_width(1.25); 
     uLCD.text_height(1.25);
     uLCD.locate(0,0);
     uLCD.printf("Alarm: ");
     //UPDATE WITH VARS
-    uLCD.printf("00:00");
-    uLCD.printf("am");
+    char alarmTime[32];
+    strftime(alarmTime, 32, "%I:%M %p\n", localtime(&ALARM_TIME));
+    uLCD.printf("%s", alarmTime);
     
     //TIME
-    uLCD.text_width(2.5); //4X size text
+    uLCD.text_width(2.5); 
     uLCD.text_height(2.5);
-    uLCD.locate(1,2.5);
+    uLCD.locate(0.5,2.5);
     //Pull current time and set it to a charArray
     char curTime[32];
     strftime(curTime, 32, "%I:%M %p\n", localtime(&LOCAL_TIME));
     uLCD.printf("%s", curTime);
-    //DEBUG
-    printf("\r\n%s", curTime);
-    //END DEBUG
+
     //MENU/MODE
-    uLCD.text_width(1.25); //4X size text
-    uLCD.text_height(1.25);
-    uLCD.locate(1,14);
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,12);
     uLCD.printf("Menu");
-    uLCD.locate(8,14);
-    uLCD.printf("Mode: ");
+    uLCD.locate(1,14);
+    uLCD.printf("Mode:");
+    
     //GET MODE
-    uLCD.printf("mode");
+    uLCD.locate(6,14);
+    switch(CURRENT_MODE){
+        case SLEEP:
+            uLCD.printf("Sleep");
+            break;
+        case COLOR_WHEEL:
+            uLCD.printf("Color Wheel");
+            break;
+        case RAINBOW:
+            uLCD.printf("Rainbow");
+            break;
+        case LIGHT_ON:
+            uLCD.printf("Light On");
+            break;
+        case LIGHT_OFF:
+            uLCD.printf("Light Off");
+            break;
+        default:
+            uLCD.printf("n/a");
+            break;
+    }
 }
 
 void editVariable(){
