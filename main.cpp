@@ -64,6 +64,23 @@ int cursor_y = 19;
 int cursor_radius = 2;
 int cursor_color = RED;
 
+char* getCurrentMode() {
+    switch(CURRENT_MODE){
+        case SLEEP:
+            return "Sleep";
+        case COLOR_WHEEL:
+            return "Color Wheel";
+        case RAINBOW:
+            return "Rainbow";
+        case LIGHT_ON:
+            return "Light On";
+        case LIGHT_OFF:
+            return "Light Off";
+        default:
+            return "n/a";
+    }
+}
+
 void updateCursor(){ 
     // UPDATE THE PAGE AND INDEX BEFORE CALLING THIS FUNCTION
     // This function does handle line being "out of bounds" 
@@ -183,28 +200,7 @@ void viewSettingsScreen() {
     uLCD.printf("\n\n");
 
     //SUNSET/SUNRISE DURATION Line 5
-    uLCD.printf("Mode: ");
-    //UPDATE WITH VARS
-    switch(CURRENT_MODE){
-        case SLEEP:
-            uLCD.printf("Sleep");
-            break;
-        case COLOR_WHEEL:
-            uLCD.printf("Color Wheel");
-            break;
-        case RAINBOW:
-            uLCD.printf("Rainbow");
-            break;
-        case LIGHT_ON:
-            uLCD.printf("Light On");
-            break;
-        case LIGHT_OFF:
-            uLCD.printf("Light Off");
-            break;
-        default:
-            uLCD.printf("n/a");
-            break;
-    }//end switch
+    uLCD.printf("Mode: %s", getCurrentMode() );
     uLCD.printf("\n\n");
 
     //SUNSET/SUNRISE DURATION Bottom Line
@@ -221,6 +217,10 @@ void viewSettingsScreen() {
 
 //page that allows the user to edit all of the different 
 void changeSettingsScreen() {
+    
+    page = CHANGE_SETTINGS;
+    line = 0;
+    
     // Set up
     uLCD.cls();
     uLCD.color(WHITE);
@@ -229,8 +229,6 @@ void changeSettingsScreen() {
     uLCD.locate(0,0);
     uLCD.printf("CHANGE SETTINGS\n\n");
     
-    uLCD.filled_circle(cursor_x, cursor_y, cursor_radius, cursor_color);
-
     //ALARM TIME Line 1
     uLCD.printf(" Alarm: ");
     //UPDATE WITH VARS
@@ -262,28 +260,7 @@ void changeSettingsScreen() {
     uLCD.printf("\n");
 
     //SUNSET/SUNRISE DURATION Line 5
-    uLCD.printf(" Mode: ");
-    //UPDATE WITH VARS
-    switch(CURRENT_MODE){
-        case SLEEP:
-            uLCD.printf("Sleep");
-            break;
-        case COLOR_WHEEL:
-            uLCD.printf("Color Wheel");
-            break;
-        case RAINBOW:
-            uLCD.printf("Rainbow");
-            break;
-        case LIGHT_ON:
-            uLCD.printf("Light On");
-            break;
-        case LIGHT_OFF:
-            uLCD.printf("Light Off");
-            break;
-        default:
-            uLCD.printf("n/a");
-            break;
-    }//end switch
+    uLCD.printf(" Mode: %s", getCurrentMode() );
     uLCD.printf("\n\n");
 
     //SUNSET/SUNRISE DURATION Bottom Line
@@ -300,11 +277,17 @@ void changeSettingsScreen() {
 }
 
 void menuScreen() {
+    uLCD.cls();
+
     uLCD.color(WHITE);
     //VIEW SETTINGS
     uLCD.text_width(1); 
     uLCD.text_height(1);
-    uLCD.locate(1,1);
+    
+    uLCD.locate(0,0);
+    uLCD.printf("MENU");
+
+    uLCD.locate(1,2);
     uLCD.printf("View Settings");
     //CHANGE SETTINGS
     uLCD.text_width(1); 
@@ -318,7 +301,9 @@ void menuScreen() {
     uLCD.printf("Back");
     //CURSOR
     //NEED SOMETHING FOR SELECTING
+    
     page = MENU;
+    line  = 0;
     updateCursor();
 }
 
@@ -358,28 +343,12 @@ void homeScreen(){
     
     //GET MODE
     uLCD.locate(6,14);
-    switch(CURRENT_MODE){
-        case SLEEP:
-            uLCD.printf("Sleep");
-            break;
-        case COLOR_WHEEL:
-            uLCD.printf("Color Wheel");
-            break;
-        case RAINBOW:
-            uLCD.printf("Rainbow");
-            break;
-        case LIGHT_ON:
-            uLCD.printf("Light On");
-            break;
-        case LIGHT_OFF:
-            uLCD.printf("Light Off");
-            break;
-        default:
-            uLCD.printf("n/a");
-            break;
-    }//end switch
+    uLCD.printf("%s", getCurrentMode() );//end switch
 
     updateCursor();
+    
+    page = MAIN;
+    line = 0;
 
 }
 
@@ -612,6 +581,7 @@ int main() {
             pc.printf("Page : %d line: %d\n", page, line);
             selection();
         }
+    }
 
 }
 
