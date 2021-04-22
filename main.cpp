@@ -78,8 +78,8 @@ void updateCursor(){
         case MAIN:              // line should ever only be 0
             pc.printf("in main\n");
             wait_ms(500);      // flash the circle so people know that it is active
-            cursor_x = 20;        // does not change
-            cursor_y = 20;        // does not change
+            cursor_x = 4;        // does not change
+            cursor_y = 99;        // does not change
             line = 0;
             break;
         
@@ -294,31 +294,54 @@ void homeScreen(){
     uLCD.cls();
     uLCD.color(WHITE);
     //ALARM
-    uLCD.text_width(1.25); //4X size text
+    uLCD.text_width(1.25); 
     uLCD.text_height(1.25);
     uLCD.locate(0,0);
     uLCD.printf("Alarm: ");
     //UPDATE WITH VARS
-    uLCD.printf("00:00");
-    uLCD.printf("am");
+    char alarmTime[32];
+    strftime(alarmTime, 32, "%I:%M %p\n", localtime(&ALARM_TIME));
+    uLCD.printf("%s", alarmTime);
     
     //TIME
-    uLCD.text_width(2.5); //4X size text
+    uLCD.text_width(2.5); 
     uLCD.text_height(2.5);
-    uLCD.locate(1.5,2.5);
-    //UPDATE WITH VARS
-    uLCD.printf("12:00");
-    uLCD.printf("am");
-    
+    uLCD.locate(0.5,2.5);
+    //Pull current time and set it to a charArray
+    char curTime[32];
+    strftime(curTime, 32, "%I:%M %p\n", localtime(&LOCAL_TIME));
+    uLCD.printf("%s", curTime);
+
     //MENU/MODE
-    uLCD.text_width(1.25); //4X size text
-    uLCD.text_height(1.25);
-    uLCD.locate(2,14);
+    uLCD.text_width(1); 
+    uLCD.text_height(1);
+    uLCD.locate(1,12);
     uLCD.printf("Menu");
-    uLCD.locate(9,14);
-    uLCD.printf("Mode: ");
+    uLCD.locate(1,14);
+    uLCD.printf("Mode:");
+    
     //GET MODE
-    uLCD.printf("mode");
+    uLCD.locate(6,14);
+    switch(CURRENT_MODE){
+        case SLEEP:
+            uLCD.printf("Sleep");
+            break;
+        case COLOR_WHEEL:
+            uLCD.printf("Color Wheel");
+            break;
+        case RAINBOW:
+            uLCD.printf("Rainbow");
+            break;
+        case LIGHT_ON:
+            uLCD.printf("Light On");
+            break;
+        case LIGHT_OFF:
+            uLCD.printf("Light Off");
+            break;
+        default:
+            uLCD.printf("n/a");
+            break;
+    }//end switch
     
     updateCursor();
 }
@@ -344,8 +367,30 @@ void selection() {
             }
             break;
         case VIEW_SETTINGS:
+            pc.printf("VIEW SETTINGS to MENU");
+            menuScreen();
             break;
         case CHANGE_SETTINGS:
+            pc.printf("CHANGE SETTINGS to ");
+            if (line == 0) {
+                pc.printf("ALARM TIME\n");
+                //updatingAlarm();
+            } else if (line == 1) {
+                pc.printf("LOCAL TIME \n");
+                //updatingLocal();
+            } else if (line == 2) {
+                pc.printf("SNOOZE DUR \n");
+                //updatingSnooze();
+            } else if (line == 3) {
+                pc.printf("SUN DUR \n");
+                //updatingSun();
+            } else if (line == 4) {
+                pc.printf("Mode \n");
+                //updatingSnooze();
+            } else if (line == 5) {
+                pc.printf("BACK & SAVE \n");
+                menuScreen();
+            }
             break;
         default:
             break;
