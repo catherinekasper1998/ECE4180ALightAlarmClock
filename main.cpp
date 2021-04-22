@@ -384,7 +384,7 @@ void editVariable(){
         wait(0.5);
     }
     //LOCAL TIME LOCATION
-    if(0){
+    if (0) {
         //hour location
         uLCD.locate(8,4);
         
@@ -435,7 +435,8 @@ void editVariable(){
         wait(0.5);
     }
     //MODE LOCATION
-    if(1){
+    if(1) {
+        
         for(int modeInt = 0; modeInt < 5; modeInt++){
             //min location
             uLCD.locate(7,10);
@@ -471,32 +472,177 @@ void editVariable(){
 }
 
 void updatingAlarm() {
+    // the flashing function
+    uLCD.locate(8,2);
+    
+    int currentLocation = 0;
+    bool notDone = true;
+
+    char alarmTime[32];
+    strftime(alarmTime, 32, "%I:%M %p", localtime(&ALARM_TIME));
+
+    int hr_var = ;
+    int min_var = ;
+    int am_var = 0;
+
+    while (notDone) {
+        
+        switch (currentLocation) {
+            case 0:
+                uLCD.printf("  ");
+                wait(0.4);
+
+                uLCD.locate(8,2);
+
+                char alarmTime[32];
+                strftime(alarmTime, 32, "%I:%M %p", localtime(&ALARM_TIME));
+
+                uLCD.printf("%d", );
+                wait(0.4);
+
+                if (upPB == 0) {
+                    // increase value
+                } else if (downPB == 0) {
+                    // decrease value
+                } else if (leftPB == 0) {
+                    // move to AM
+                } else if (rightPB == 0) {
+                    // move to min
+                } else if (centerPB == 0) {
+                    // save value -> exit update Alarm
+                    notDone = false;
+                }
+
+                break;
+            
+            case 1:
+                //min location
+                uLCD.locate(11,2);
+                    
+                uLCD.printf("  ");
+                wait(0.3);
+                uLCD.locate(11,2);
+                uLCD.printf("59");
+                wait(0.3);
+                break;
+
+            case 2:  
+                //am/pm
+                uLCD.locate(13,2);
+                
+                uLCD.printf("  ");
+                wait(0.3);
+                uLCD.locate(13,2);
+                uLCD.printf("am");
+                wait(0.3);
+                break;
+        }
+    }
+
+    // restablish the page just in case
+    int saveCursorLine = line;
+    changeSettingsScreen();
+    line = saveCursorLine;
+    updateCursor();
 
 }
 
 void updatingLocal() {
+    //hour location
+    uLCD.locate(8,4);
+        
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(8,4);
+    uLCD.printf("12");
+    wait(0.5);
+        
+    //min location
+    uLCD.locate(11,4);
+        
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(11,4);
+    uLCD.printf("59");
+    wait(0.5);
+        
+    //am/pm
+    uLCD.locate(13,4);
+        
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(13,4);
+    uLCD.printf("am");
+    wait(0.5);
 
 }
 
 void updatingSnooze() {
+    uLCD.locate(13,6);
+        
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(13,6);
+    uLCD.printf("15");
+    wait(0.5);
 
 }
 
 void updatingSun() {
+    uLCD.locate(13,8);
+        
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(13,8);
+    uLCD.printf("30");
+    wait(0.5);
 
 }
 
 void updatingMode() {
+        for(int modeInt = 0; modeInt < 5; modeInt++){
+            //min location
+            uLCD.locate(7,10);
+            
+            //clear line before printing next one
+            uLCD.printf("           ");
+            
+            wait(1);
+            uLCD.locate(7,10);
+            switch(modeInt){
+                case SLEEP:
+                    uLCD.printf("Sleep");
+                    break;
+                case COLOR_WHEEL:
+                    uLCD.printf("Color Wheel");
+                    break;
+                case RAINBOW:
+                    uLCD.printf("Rainbow");
+                    break;
+                case LIGHT_ON:
+                    uLCD.printf("Light On");
+                    break;
+                case LIGHT_OFF:
+                    uLCD.printf("Light Off");
+                    break;
+                default:
+                    uLCD.printf("n/a");
+                    break;
+            }//end switch
+            wait(1);
+        }//end for
     
 }
 
 
 void selection() {
+    
     switch (page) {
         case MAIN:
             pc.printf("MAIN to MENU \n");
             menuScreen();
             break;
+            
         case MENU:
             pc.printf("MENU to ");
             if (line == 0) {
@@ -510,10 +656,12 @@ void selection() {
                 homeScreen();
             }
             break;
+            
         case VIEW_SETTINGS:
             pc.printf("VIEW SETTINGS to MENU");
             menuScreen();
             break;
+            
         case CHANGE_SETTINGS:
             pc.printf("CHANGE SETTINGS to ");
             if (line == 0) {
@@ -536,6 +684,7 @@ void selection() {
                 menuScreen();
             }
             break;
+            
         default:
             break;
     }
