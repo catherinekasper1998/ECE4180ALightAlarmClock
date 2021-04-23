@@ -481,9 +481,11 @@ void updatingAlarm() {
     char alarmTime[32];
     strftime(alarmTime, 32, "%I:%M %p", localtime(&ALARM_TIME));
 
-    int hr_var = ;
-    int min_var = ;
-    int am_var = 0;
+    
+
+    int hr_var = int("01");
+    int min_var = int("02");
+    bool am_var = true;
 
     while (notDone) {
         
@@ -494,20 +496,21 @@ void updatingAlarm() {
 
                 uLCD.locate(8,2);
 
-                char alarmTime[32];
-                strftime(alarmTime, 32, "%I:%M %p", localtime(&ALARM_TIME));
-
-                uLCD.printf("%d", );
+                uLCD.printf("%d", hr_var);
                 wait(0.4);
 
                 if (upPB == 0) {
                     // increase value
+                    hr_var++;
                 } else if (downPB == 0) {
                     // decrease value
+                    hr_var--;
                 } else if (leftPB == 0) {
                     // move to AM
+                    currentLocation = 2; // esssentially --;
                 } else if (rightPB == 0) {
                     // move to min
+                    currentLocation++; // esssentially --;
                 } else if (centerPB == 0) {
                     // save value -> exit update Alarm
                     notDone = false;
@@ -520,10 +523,26 @@ void updatingAlarm() {
                 uLCD.locate(11,2);
                     
                 uLCD.printf("  ");
-                wait(0.3);
+                wait(0.4);
                 uLCD.locate(11,2);
-                uLCD.printf("59");
-                wait(0.3);
+                uLCD.printf("%d", min_var);
+                wait(0.4);
+                if (upPB == 0) {
+                    // increase value
+                    min_var++;
+                } else if (downPB == 0) {
+                    // decrease value
+                    min_var--;
+                } else if (leftPB == 0) {
+                    // move to AM
+                    currentLocation--; // to 0
+                } else if (rightPB == 0) {
+                    // move to min
+                    currentLocation++; // to 2
+                } else if (centerPB == 0) {
+                    // save value -> exit update Alarm
+                    notDone = false;
+                }
                 break;
 
             case 2:  
@@ -531,10 +550,31 @@ void updatingAlarm() {
                 uLCD.locate(13,2);
                 
                 uLCD.printf("  ");
-                wait(0.3);
+                wait(0.4);
                 uLCD.locate(13,2);
-                uLCD.printf("am");
-                wait(0.3);
+
+                if (am_var) {
+                    uLCD.printf("am");
+                } else {
+                    uLCD.printf("pm");
+                }
+
+                wait(0.4);
+
+                if (upPB == 0 | downPB == 0) {
+                    // increase value
+                    am_var = !am_var; // flip the variable's value
+                } else if (leftPB == 0) {
+                    // move to AM
+                    currentLocation--; // to 1
+                } else if (rightPB == 0) {
+                    // move to min
+                    currentLocation = 0; // to 0
+                } else if (centerPB == 0) {
+                    // save value -> exit update Alarm
+                    notDone = false;
+                }
+
                 break;
         }
     }
