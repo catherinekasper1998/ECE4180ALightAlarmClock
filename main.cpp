@@ -1,5 +1,7 @@
 #include "mbed.h"
 #include "uLCD_4DGL.h"
+BusOut myled(LED1,LED2,LED3,LED4);
+Serial blue(p28,p27);
 
 /*
 Final Project for 4180.
@@ -56,13 +58,60 @@ time_t LOCAL_TIME;
 time_t ALARM_TIME;
 int SNOOZE_DURATION_MIN = 5;
 int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
-int CURRENT_MODE = OFF;
+int CURRENT_MODE = SLEEP;
 int RAINBOW_COLOR = WHITE;
 
 int cursor_x = 4;
 int cursor_y = 19;
 int cursor_radius = 2;
 int cursor_color = RED;
+
+int charToInt(char character) {
+    pc.printf("Char to int input %c\n", character);
+    switch (character) {
+        case '0':
+            pc.printf("output %d\n", 0);
+            return 0;
+        case '1':
+            pc.printf("output %d\n", 1);
+            return 1;
+        case '2':
+            pc.printf("output %d\n", 2);
+            return 2;
+        case '3':
+            pc.printf("output %d\n", 3);
+            return 3;
+        case '4':
+            pc.printf("output %d\n", 4);
+            return 4;
+        case '5':
+            pc.printf("output %d\n", 5);
+            return 5;
+        case '6':
+            pc.printf("output %d\n", 6);
+            return 6;
+        case '7':
+            pc.printf("output %d\n", 7);
+            return 7;
+        case '8':
+            pc.printf("output %d\n", 8);
+            return 8;
+        case '9':
+            pc.printf("output %d\n", 9);
+            return 9;
+        default:
+            pc.printf("ERROR IN CHAR TO INT");
+            return -1;
+    }
+}
+
+int getIntHr(char* time) {
+    return (charToInt(time[0]) * 10) + charToInt(time[1]);
+}
+
+int getIntMin(char* time) {
+    return (charToInt(time[0]) * 10) + charToInt(time[1]);
+}
 
 char* getCurrentMode() {
     switch(CURRENT_MODE){
@@ -85,7 +134,6 @@ void updateCursor(){
     // UPDATE THE PAGE AND INDEX BEFORE CALLING THIS FUNCTION
     // This function does handle line being "out of bounds" 
     // and reassigns a "wrapped around value" its proper line
-    pc.printf(" Circle Location (x: %d , y: %d)\n" , cursor_x, cursor_y);
 
     uLCD.filled_circle(cursor_x, cursor_y, cursor_radius, BLACK);
 
@@ -473,38 +521,47 @@ void editVariable(){
 
 void updatingAlarm() {
     // the flashing function
-    uLCD.locate(8,2);
+    wait(0.8);
     
     int currentLocation = 0;
     bool notDone = true;
 
     char alarmTime[32];
     strftime(alarmTime, 32, "%I:%M %p", localtime(&ALARM_TIME));
+    
+    pc.printf("line 484\n");
 
     
-
-    int hr_var = int("01");
-    int min_var = int("02");
+    int hr_val = getIntHr(alarmTime);
+    int min_val = getIntMin(alarmTime);
     bool am_var = true;
 
     while (notDone) {
         
         switch (currentLocation) {
             case 0:
+                uLCD.locate(8,2);
                 uLCD.printf("  ");
-                wait(0.4);
+                wait(0.15);
 
                 uLCD.locate(8,2);
 
-                uLCD.printf("%d", hr_var);
-                wait(0.4);
+                if (hr_val > 9) {
+                    uLCD.printf("%d", hr_val);
+                } else {
+                    uLCD.printf("0%d", hr_val);
+                }
+                wait(0.15);
+                 pc.printf("Is this looping? casse 0 \n");
 
                 if (upPB == 0) {
                     // increase value
-                    hr_var++;
+                    hr_val++;
+                    if (hr_val > 12) hr_val = 12;
                 } else if (downPB == 0) {
                     // decrease value
-                    hr_var--;
+                    hr_val--;
+                    if (hr_val < 0) hr_val = 1;
                 } else if (leftPB == 0) {
                     // move to AM
                     currentLocation = 2; // esssentially --;
@@ -523,43 +580,54 @@ void updatingAlarm() {
                 uLCD.locate(11,2);
                     
                 uLCD.printf("  ");
-                wait(0.4);
+                wait(0.15);
                 uLCD.locate(11,2);
-                uLCD.printf("%d", min_var);
-                wait(0.4);
+                if (min_val > 9) {
+                    uLCD.printf("%d", min_val);
+                } else {
+                    uLCD.printf("0%d", min_val);
+                }
+                
+                wait(0.15);
+                
                 if (upPB == 0) {
                     // increase value
-                    min_var++;
+                    min_val++;
+                    if (min_val < 0) min_val = 0;
                 } else if (downPB == 0) {
                     // decrease value
-                    min_var--;
+                    min_val--;
+                    if (min_val > 59) min_val = 59;
                 } else if (leftPB == 0) {
                     // move to AM
                     currentLocation--; // to 0
+                    wait(0.7);
                 } else if (rightPB == 0) {
                     // move to min
                     currentLocation++; // to 2
+                    wait(0.7);
                 } else if (centerPB == 0) {
                     // save value -> exit update Alarm
                     notDone = false;
+                    wait(0.8);
                 }
                 break;
 
             case 2:  
                 //am/pm
-                uLCD.locate(13,2);
+                uLCD.locate(14,2);
                 
                 uLCD.printf("  ");
-                wait(0.4);
-                uLCD.locate(13,2);
+                wait(0.15);
+                uLCD.locate(14,2);
 
                 if (am_var) {
-                    uLCD.printf("am");
+                    uLCD.printf("AM");
                 } else {
-                    uLCD.printf("pm");
+                    uLCD.printf("PM");
                 }
 
-                wait(0.4);
+                wait(0.15);
 
                 if (upPB == 0 | downPB == 0) {
                     // increase value
@@ -575,6 +643,9 @@ void updatingAlarm() {
                     notDone = false;
                 }
 
+                break;
+            default:
+                pc.printf("Fallthrough Case\n");
                 break;
         }
     }
@@ -625,52 +696,88 @@ void updatingSnooze() {
     uLCD.locate(13,6);
     uLCD.printf("15");
     wait(0.5);
+    bool selected = false;
+    
+    while (!selected) {
+        
+        uLCD.locate(13,6);
+        
+        uLCD.printf("  ");
+        wait(0.15);
+        uLCD.locate(13,6);
+        uLCD.printf("%d", SNOOZE_DURATION_MIN);
+        wait(0.15);
+        
+        if (upPB == 0 | rightPB == 0) {
+            SNOOZE_DURATION_MIN++;
+            if (SNOOZE_DURATION_MIN > 30) SNOOZE_DURATION_MIN = 30; // maximum value
+        } else if (downPB == 0 | leftPB == 0) {
+            SNOOZE_DURATION_MIN--;
+            if (SNOOZE_DURATION_MIN < 1) SNOOZE_DURATION_MIN = 1; // minimum value
+        } else if (centerPB == 0) {
+            selected = true;
+        }
+    }
+    wait(0.9);
 
 }
 
 void updatingSun() {
-    uLCD.locate(13,8);
+    
+    bool selected = false;
+    
+    while (!selected) {
         
-    uLCD.printf("  ");
-    wait(0.5);
-    uLCD.locate(13,8);
-    uLCD.printf("30");
-    wait(0.5);
+        uLCD.locate(13,8);
+        
+        uLCD.printf("  ");
+        wait(0.15);
+        uLCD.locate(13,8);
+        uLCD.printf("%d", SUNRISE_AND_SUNSET_DURATION_MIN);
+        wait(0.15);
+        
+        if (upPB == 0 | rightPB == 0) {
+            SUNRISE_AND_SUNSET_DURATION_MIN++;
+            if (SUNRISE_AND_SUNSET_DURATION_MIN > 60) SUNRISE_AND_SUNSET_DURATION_MIN = 60; // maximum value
+        } else if (downPB == 0 | leftPB == 0) {
+            SUNRISE_AND_SUNSET_DURATION_MIN--;
+            if (SUNRISE_AND_SUNSET_DURATION_MIN < 5) SUNRISE_AND_SUNSET_DURATION_MIN = 5; // minimum value
+        } else if (centerPB == 0) {
+            selected = true;
+        }
+    }
+    wait(0.9);
 
 }
 
 void updatingMode() {
-        for(int modeInt = 0; modeInt < 5; modeInt++){
-            //min location
-            uLCD.locate(7,10);
+        
+    bool selected = false;
+    
+    while (!selected) {
+        //min location
+        uLCD.locate(7,10);
             
-            //clear line before printing next one
-            uLCD.printf("           ");
+        //clear line before printing next one
+        uLCD.printf("           ");
             
-            wait(1);
-            uLCD.locate(7,10);
-            switch(modeInt){
-                case SLEEP:
-                    uLCD.printf("Sleep");
-                    break;
-                case COLOR_WHEEL:
-                    uLCD.printf("Color Wheel");
-                    break;
-                case RAINBOW:
-                    uLCD.printf("Rainbow");
-                    break;
-                case LIGHT_ON:
-                    uLCD.printf("Light On");
-                    break;
-                case LIGHT_OFF:
-                    uLCD.printf("Light Off");
-                    break;
-                default:
-                    uLCD.printf("n/a");
-                    break;
-            }//end switch
-            wait(1);
-        }//end for
+        wait(0.15);
+        uLCD.locate(7,10);
+        uLCD.printf("%s", getCurrentMode());
+            
+        wait(0.15);
+        
+        if (upPB == 0 | rightPB == 0) {
+            CURRENT_MODE++;
+            if (CURRENT_MODE > 4) CURRENT_MODE = 0;
+        } else if (downPB == 0 | leftPB == 0) {
+            CURRENT_MODE--;
+            if (CURRENT_MODE < 0) CURRENT_MODE = 4;
+        } else if (centerPB == 0) {
+            selected = true;
+        }
+    }
+    wait(0.9);
     
 }
 
@@ -749,28 +856,58 @@ int main() {
     wait(1.0);
     homeScreen();
     
+    char bnum=0;
+    
     while(1) {
         LOCAL_TIME = time(NULL);            //update local time
 
-        //pc.printf("page: %d line: %d \n", page, line);
+        pc.printf("LOOPING\n");
         if (downPB == 0) {
             pc.printf("Down\n");
-            pc.printf("page: %d line: %d \n", page, line);
             line++;
             updateCursor();
             wait_ms(500);
         } else if (upPB == 0) {
             pc.printf("Up\n");
-            pc.printf("page: %d line: %d \n", page, line);
             line--;
             updateCursor();
             wait_ms(500);
         } else if (centerPB == 0) {
             pc.printf("Center\n");
-            pc.printf("Page : %d line: %d\n", page, line);
             selection();
-        }
-    }
+            
+        } else if (blue.readable() && blue.getc()=='!') {
+            
+            if (blue.getc()=='B') { //button data
+            
+                bnum = blue.getc(); //button number
+                
+                if (blue.getc() == '1') { // release
+                
+                    if ((bnum>='1')&&(bnum<='4')) //is a number button 1..4
+                        myled[bnum-'1']=blue.getc()-'0'; //turn on/off that num LED
+                    if (bnum == '5') {
+                        pc.printf("BUTTON 5"); // UP
+                        line--;
+                        updateCursor();
+                        wait_ms(500);
+                    } else if (bnum == '6') {
+                        pc.printf("BUTTON 6"); // DOWN
+                        line++;
+                        updateCursor();
+                        wait_ms(500);
+                    } else if (bnum == '7') {
+                        pc.printf("BUTTON 7"); // LEFT
+                    } else if (bnum == '8') {
+                        pc.printf("BUTTON 8"); // RIGHT
+                    } else if (bnum == '1') {
+                        pc.printf("BUTTON No. 1"); // RIGHT
+                        selection();
+                    }
+                } // close if release
+            } // if == B
+        } // if readable && == !
+    } // while loop
 
 }
 
