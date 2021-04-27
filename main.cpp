@@ -1,5 +1,7 @@
 #include "mbed.h"
 #include "uLCD_4DGL.h"
+BusOut myled(LED1,LED2,LED3,LED4);
+Serial blue(p28,p27);
 
 /*
 Final Project for 4180.
@@ -56,7 +58,7 @@ time_t LOCAL_TIME;
 time_t ALARM_TIME;
 int SNOOZE_DURATION_MIN = 5;
 int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
-int CURRENT_MODE = OFF;
+int CURRENT_MODE = SLEEP;
 int RAINBOW_COLOR = WHITE;
 
 int cursor_x = 4;
@@ -64,11 +66,74 @@ int cursor_y = 19;
 int cursor_radius = 2;
 int cursor_color = RED;
 
+int charToInt(char character) {
+    pc.printf("Char to int input %c\n", character);
+    switch (character) {
+        case '0':
+            pc.printf("output %d\n", 0);
+            return 0;
+        case '1':
+            pc.printf("output %d\n", 1);
+            return 1;
+        case '2':
+            pc.printf("output %d\n", 2);
+            return 2;
+        case '3':
+            pc.printf("output %d\n", 3);
+            return 3;
+        case '4':
+            pc.printf("output %d\n", 4);
+            return 4;
+        case '5':
+            pc.printf("output %d\n", 5);
+            return 5;
+        case '6':
+            pc.printf("output %d\n", 6);
+            return 6;
+        case '7':
+            pc.printf("output %d\n", 7);
+            return 7;
+        case '8':
+            pc.printf("output %d\n", 8);
+            return 8;
+        case '9':
+            pc.printf("output %d\n", 9);
+            return 9;
+        default:
+            pc.printf("ERROR IN CHAR TO INT");
+            return -1;
+    }
+}
+
+int getIntHr(char* time) {
+    return (charToInt(time[0]) * 10) + charToInt(time[1]);
+}
+
+int getIntMin(char* time) {
+    return (charToInt(time[0]) * 10) + charToInt(time[1]);
+}
+
+char* getCurrentMode() {
+    switch(CURRENT_MODE){
+        case SLEEP:
+            return "Sleep";
+        case COLOR_WHEEL:
+            return "Color Wheel";
+        case RAINBOW:
+            return "Rainbow";
+        case LIGHT_ON:
+            return "Light On";
+        case LIGHT_OFF:
+            return "Light Off";
+        default:
+            return "n/a";
+    }
+}
+
 void updateCursor(){ 
     // UPDATE THE PAGE AND INDEX BEFORE CALLING THIS FUNCTION
     // This function does handle line being "out of bounds" 
     // and reassigns a "wrapped around value" its proper line
-    pc.printf(" Circle Location (x: %d , y: %d)\n" , cursor_x, cursor_y);
 
     uLCD.filled_circle(cursor_x, cursor_y, cursor_radius, BLACK);
 
@@ -183,28 +248,7 @@ void viewSettingsScreen() {
     uLCD.printf("\n\n");
 
     //SUNSET/SUNRISE DURATION Line 5
-    uLCD.printf("Mode: ");
-    //UPDATE WITH VARS
-    switch(CURRENT_MODE){
-        case SLEEP:
-            uLCD.printf("Sleep");
-            break;
-        case COLOR_WHEEL:
-            uLCD.printf("Color Wheel");
-            break;
-        case RAINBOW:
-            uLCD.printf("Rainbow");
-            break;
-        case LIGHT_ON:
-            uLCD.printf("Light On");
-            break;
-        case LIGHT_OFF:
-            uLCD.printf("Light Off");
-            break;
-        default:
-            uLCD.printf("n/a");
-            break;
-    }//end switch
+    uLCD.printf("Mode: %s", getCurrentMode() );
     uLCD.printf("\n\n");
 
     //SUNSET/SUNRISE DURATION Bottom Line
@@ -221,6 +265,10 @@ void viewSettingsScreen() {
 
 //page that allows the user to edit all of the different 
 void changeSettingsScreen() {
+    
+    page = CHANGE_SETTINGS;
+    line = 0;
+    
     // Set up
     uLCD.cls();
     uLCD.color(WHITE);
@@ -229,8 +277,6 @@ void changeSettingsScreen() {
     uLCD.locate(0,0);
     uLCD.printf("CHANGE SETTINGS\n\n");
     
-    uLCD.filled_circle(cursor_x, cursor_y, cursor_radius, cursor_color);
-
     //ALARM TIME Line 1
     uLCD.printf(" Alarm: ");
     //UPDATE WITH VARS
@@ -262,28 +308,7 @@ void changeSettingsScreen() {
     uLCD.printf("\n");
 
     //SUNSET/SUNRISE DURATION Line 5
-    uLCD.printf(" Mode: ");
-    //UPDATE WITH VARS
-    switch(CURRENT_MODE){
-        case SLEEP:
-            uLCD.printf("Sleep");
-            break;
-        case COLOR_WHEEL:
-            uLCD.printf("Color Wheel");
-            break;
-        case RAINBOW:
-            uLCD.printf("Rainbow");
-            break;
-        case LIGHT_ON:
-            uLCD.printf("Light On");
-            break;
-        case LIGHT_OFF:
-            uLCD.printf("Light Off");
-            break;
-        default:
-            uLCD.printf("n/a");
-            break;
-    }//end switch
+    uLCD.printf(" Mode: %s", getCurrentMode() );
     uLCD.printf("\n\n");
 
     //SUNSET/SUNRISE DURATION Bottom Line
@@ -300,11 +325,17 @@ void changeSettingsScreen() {
 }
 
 void menuScreen() {
+    uLCD.cls();
+
     uLCD.color(WHITE);
     //VIEW SETTINGS
     uLCD.text_width(1); 
     uLCD.text_height(1);
-    uLCD.locate(1,1);
+    
+    uLCD.locate(0,0);
+    uLCD.printf("MENU");
+
+    uLCD.locate(1,2);
     uLCD.printf("View Settings");
     //CHANGE SETTINGS
     uLCD.text_width(1); 
@@ -318,7 +349,9 @@ void menuScreen() {
     uLCD.printf("Back");
     //CURSOR
     //NEED SOMETHING FOR SELECTING
+    
     page = MENU;
+    line  = 0;
     updateCursor();
 }
 
@@ -358,31 +391,16 @@ void homeScreen(){
     
     //GET MODE
     uLCD.locate(6,14);
-    switch(CURRENT_MODE){
-        case SLEEP:
-            uLCD.printf("Sleep");
-            break;
-        case COLOR_WHEEL:
-            uLCD.printf("Color Wheel");
-            break;
-        case RAINBOW:
-            uLCD.printf("Rainbow");
-            break;
-        case LIGHT_ON:
-            uLCD.printf("Light On");
-            break;
-        case LIGHT_OFF:
-            uLCD.printf("Light Off");
-            break;
-        default:
-            uLCD.printf("n/a");
-            break;
-    }//end switch
+    uLCD.printf("%s", getCurrentMode() );//end switch
 
     updateCursor();
+    
+    page = MAIN;
+    line = 0;
 
 }
 
+//CAN PROBABLY BE DELETED
 void editVariable(){
     //if statements are just to test certain lines
     //ALARM TIME LOCATION
@@ -415,7 +433,7 @@ void editVariable(){
         wait(0.5);
     }
     //LOCAL TIME LOCATION
-    if(0){
+    if (0) {
         //hour location
         uLCD.locate(8,4);
         
@@ -466,7 +484,8 @@ void editVariable(){
         wait(0.5);
     }
     //MODE LOCATION
-    if(1){
+    if(1) {
+        
         for(int modeInt = 0; modeInt < 5; modeInt++){
             //min location
             uLCD.locate(7,10);
@@ -500,34 +519,490 @@ void editVariable(){
         }//end for
     }//end if
 }
+//END OF PROBABLY CAN BE DELETED
 
 void updatingAlarm() {
+    // the flashing function
+    wait(0.8);
+    
+    int currentLocation = 0;
+    bool notDone = true;
+
+    char alarmTime[32];
+    strftime(alarmTime, 32, "%I:%M %p", localtime(&ALARM_TIME));
+    
+    pc.printf("line 484\n");
+
+    
+    int hr_val = getIntHr(alarmTime);
+    int min_val = getIntMin(alarmTime);
+    bool am_var = true;
+
+    while (notDone) {
+        
+        switch (currentLocation) {
+            case 0:
+                uLCD.locate(8,2);
+                uLCD.printf("  ");
+                wait(0.15);
+
+                uLCD.locate(8,2);
+
+                if (hr_val > 9) {
+                    uLCD.printf("%d", hr_val);
+                } else {
+                    uLCD.printf("0%d", hr_val);
+                }
+                wait(0.15);
+                 pc.printf("Is this looping? casse 0 \n");
+
+                if (upPB == 0) {
+                    // increase value
+                    hr_val++;
+                    if (hr_val > 12) hr_val = 12;
+                } else if (downPB == 0) {
+                    // decrease value
+                    hr_val--;
+                    if (hr_val < 0) hr_val = 1;
+                } else if (leftPB == 0) {
+                    // move to AM
+                    currentLocation = 2; // esssentially --;
+                } else if (rightPB == 0) {
+                    // move to min
+                    currentLocation++; // esssentially --;
+                } else if (centerPB == 0) {
+                    // save value -> exit update Alarm
+                    notDone = false;
+                }
+
+                break;
+            
+            case 1:
+                //min location
+                uLCD.locate(11,2);
+                    
+                uLCD.printf("  ");
+                wait(0.15);
+                uLCD.locate(11,2);
+                if (min_val > 9) {
+                    uLCD.printf("%d", min_val);
+                } else {
+                    uLCD.printf("0%d", min_val);
+                }
+                
+                wait(0.15);
+                
+                if (upPB == 0) {
+                    // increase value
+                    min_val++;
+                    if (min_val < 0) min_val = 0;
+                } else if (downPB == 0) {
+                    // decrease value
+                    min_val--;
+                    if (min_val > 59) min_val = 59;
+                } else if (leftPB == 0) {
+                    // move to AM
+                    currentLocation--; // to 0
+                    wait(0.7);
+                } else if (rightPB == 0) {
+                    // move to min
+                    currentLocation++; // to 2
+                    wait(0.7);
+                } else if (centerPB == 0) {
+                    // save value -> exit update Alarm
+                    notDone = false;
+                    wait(0.8);
+                }
+                break;
+
+            case 2:  
+                //am/pm
+                uLCD.locate(14,2);
+                
+                uLCD.printf("  ");
+                wait(0.15);
+                uLCD.locate(14,2);
+
+                if (am_var) {
+                    uLCD.printf("AM");
+                } else {
+                    uLCD.printf("PM");
+                }
+
+                wait(0.15);
+
+                if (upPB == 0 | downPB == 0) {
+                    // increase value
+                    am_var = !am_var; // flip the variable's value
+                } else if (leftPB == 0) {
+                    // move to AM
+                    currentLocation--; // to 1
+                } else if (rightPB == 0) {
+                    // move to min
+                    currentLocation = 0; // to 0
+                } else if (centerPB == 0) {
+                    // save value -> exit update Alarm
+                    notDone = false;
+                }
+
+                break;
+            default:
+                pc.printf("Fallthrough Case\n");
+                break;
+        }
+    }
+
+    // restablish the page just in case
+    int saveCursorLine = line;
+    changeSettingsScreen();
+    line = saveCursorLine;
+    updateCursor();
 
 }
+
 
 void updatingLocal() {
+    //hour, min, am/pm vars
+    int hour = 1;
+    int min = 0;
+    int ampm = 0; // 0 is am 1 is pm
+    bool notdone = true;
+    
+    char bnum = 0;
+    //lazy solution
+    //do hours then mins then am/pm
+    //No ability to go back once confirmed
+    
+    //set hours
+    while(notdone){
+        //flash hour
+        uLCD.locate(8,4);   
+        uLCD.printf("  ");
+        wait(0.15);
+        uLCD.locate(8,4);
+        uLCD.printf("%d", hour);
+        wait(0.15);
+            
+        if (blue.readable()){
+            pc.printf("READABLE Serial\n");
+          
+            if (blue.getc()=='!') {
 
+                if (blue.getc()=='B') { //button data
+                    
+                    bnum = blue.getc(); //button number
+     
+                    if (blue.getc() == '0') { // push
+                        pc.printf("PUSH\n");
+                    
+                        if (bnum == '5' || bnum == '8') {
+                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                            hour++;
+                            if (hour > 12) hour = 12; // maximum value
+                        } else if (bnum == '6' || bnum == '7') {
+                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                            hour--;
+                            if (hour < 1) hour = 1; // minimum value
+                        } else if (bnum == '1') {
+                            pc.printf("BUTTON No. 1"); // 1 pressed
+                            notdone = false;
+                        }
+                    } // close if release
+                } // if == B
+            }// == !
+        } // if readable && == !
+    }
+    //set min
+    notdone = true;
+    while(notdone){
+        //flash hour
+        uLCD.locate(11,4);   
+        uLCD.printf("  ");
+        wait(0.15);
+        uLCD.locate(11,4);
+        uLCD.printf("%d", min);
+        wait(0.15);
+            
+        if (blue.readable()){
+            pc.printf("READABLE Serial\n");
+          
+            if (blue.getc()=='!') {
+
+                if (blue.getc()=='B') { //button data
+                    
+                    bnum = blue.getc(); //button number
+     
+                    if (blue.getc() == '0') { // push
+                        pc.printf("PUSH\n");
+                    
+                        if (bnum == '5' || bnum == '8') {
+                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                            min++;
+                            if (hour > 59) hour = 59; // maximum value
+                        } else if (bnum == '6' || bnum == '7') {
+                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                            min--;
+                            if (min < 0) min = 0; // minimum value
+                        } else if (bnum == '1') {
+                            pc.printf("BUTTON No. 1"); // 1 pressed
+                            notdone = false;
+                        }
+                    } // close if release
+                } // if == B
+            }// == !
+        } // if readable && == !
+    }
+    //set am/pm
+    notdone = true;
+    while(notdone){
+        //flash hour
+        uLCD.locate(14,4);   
+        uLCD.printf("  ");
+        wait(0.15);
+        uLCD.locate(14,4);
+        if(ampm == 0) uLCD.printf("AM");
+        else uLCD.printf("PM");
+        wait(0.15);
+            
+        if (blue.readable()){
+            pc.printf("READABLE Serial\n");
+          
+            if (blue.getc()=='!') {
+
+                if (blue.getc()=='B') { //button data
+                    
+                    bnum = blue.getc(); //button number
+     
+                    if (blue.getc() == '0') { // push
+                        pc.printf("PUSH\n");
+                    
+                        if (bnum == '5' || bnum == '8' || bnum == '6' || bnum == '7') {
+                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT & DOWN & LEFT
+                            if(ampm == 0)ampm = 1;
+                            else ampm = 0;
+                        } 
+                        else if (bnum == '1') {
+                            pc.printf("BUTTON No. 1"); // 1 pressed
+                            notdone = false;
+                        }
+                    } // close if release
+                } // if == B
+            }// == !
+        } // if readable && == !
+    }
+    
+    int timeTemp = hour*3600 + min*60 + ampm*43140;//convert into secs (43140 is seconds from 12am to 11:59am)
+    set_time(timeTemp);
+    wait(0.9);
+    /*
+    uLCD.locate(8,4);
+        
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(8,4);
+    uLCD.printf("12");
+    wait(0.5);
+        
+    //min location
+    uLCD.locate(11,4);
+        
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(11,4);
+    uLCD.printf("59");
+    wait(0.5);
+        
+    //am/pm
+    uLCD.locate(14,4);
+        
+    uLCD.printf("  ");
+    wait(0.5);
+    uLCD.locate(14,4);
+    uLCD.printf("am");
+    wait(0.5);
+    */
 }
 
+
 void updatingSnooze() {
+        
+    bool selected = false;
+
+    char bnum = 0;
+    
+    while (!selected) {
+        
+        uLCD.locate(12,6);
+        
+        uLCD.printf("  ");
+        wait(0.15);
+        uLCD.locate(12,6);
+        uLCD.printf("%d", SNOOZE_DURATION_MIN);
+        wait(0.15);
+        
+        if (upPB == 0 | rightPB == 0) {
+            SNOOZE_DURATION_MIN++;
+            if (SNOOZE_DURATION_MIN > 30) SNOOZE_DURATION_MIN = 30; // maximum value
+        } else if (downPB == 0 | leftPB == 0) {
+            SNOOZE_DURATION_MIN--;
+            if (SNOOZE_DURATION_MIN < 1) SNOOZE_DURATION_MIN = 1; // minimum value
+        } else if (centerPB == 0) {
+            selected = true;
+        } else if (blue.readable()){
+            pc.printf("READABLE Serial\n");
+          
+            if (blue.getc()=='!') {
+
+                if (blue.getc()=='B') { //button data
+                    
+                    bnum = blue.getc(); //button number
+                    pc.printf("bnum: %c\n\r",bnum);
+                    if (blue.getc() == '0') { // push
+                        pc.printf("PUSH\n");
+                    
+                        if (bnum == '5' || bnum == '8') {
+                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                            SNOOZE_DURATION_MIN++;
+                            if (SNOOZE_DURATION_MIN > 30) SNOOZE_DURATION_MIN = 30; // maximum value
+                        } else if (bnum == '6' || bnum == '7') {
+                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                            SNOOZE_DURATION_MIN--;
+                            if (SNOOZE_DURATION_MIN < 1) SNOOZE_DURATION_MIN = 1; // minimum value
+                        } else if (bnum == '1') {
+                            pc.printf("BUTTON No. 1"); // RIGHT
+                            selected = true;
+                        }
+                    } // close if release
+                } // if == B
+            }// == !
+        } // if readable && == !
+    }
+    wait(0.9);
 
 }
 
 void updatingSun() {
+    
+    bool selected = false;
+    char bnum = 0;
+    
+    while (!selected) {
+        
+        uLCD.locate(13,8);
+        
+        uLCD.printf("  ");
+        wait(0.15);
+        uLCD.locate(13,8);
+        uLCD.printf("%d", SUNRISE_AND_SUNSET_DURATION_MIN);
+        wait(0.15);
+        
+        if (upPB == 0 | rightPB == 0) {
+            SUNRISE_AND_SUNSET_DURATION_MIN++;
+            if (SUNRISE_AND_SUNSET_DURATION_MIN > 60) SUNRISE_AND_SUNSET_DURATION_MIN = 60; // maximum value
+        } else if (downPB == 0 | leftPB == 0) {
+            SUNRISE_AND_SUNSET_DURATION_MIN--;
+            if (SUNRISE_AND_SUNSET_DURATION_MIN < 5) SUNRISE_AND_SUNSET_DURATION_MIN = 5; // minimum value
+        } else if (centerPB == 0) {
+            selected = true;
+        } else if (blue.readable()){
+            pc.printf("READABLE Serial\n");
+            if (blue.getc()=='!') {
+            
+                if (blue.getc()=='B') { //button data
+                
+                    bnum = blue.getc(); //button number
+                    
+                    if (blue.getc() == '0') { // push
+                        pc.printf("PUSH\n");
+                    
+                        if (bnum == '5' || bnum == '8') {
+                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                            SUNRISE_AND_SUNSET_DURATION_MIN++;
+                            if (SUNRISE_AND_SUNSET_DURATION_MIN > 60) SUNRISE_AND_SUNSET_DURATION_MIN = 60; // maximum value
+                        } else if (bnum == '6' || bnum == '7') {
+                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                            SUNRISE_AND_SUNSET_DURATION_MIN--;
+                            if (SUNRISE_AND_SUNSET_DURATION_MIN < 5) SUNRISE_AND_SUNSET_DURATION_MIN = 5; // minimum value
+                        } else if (bnum == '1') {
+                            pc.printf("BUTTON No. 1"); // RIGHT
+                            selected = true;
+                        }
+                    } // close if release
+                } // if == B
+            }// == !
+        } // if readable && == !
+    }
+    wait(0.9);
 
 }
 
 void updatingMode() {
+        
+    bool selected = false;
+    char bnum=0;
+    
+    while (!selected) {
+        //min location
+        uLCD.locate(7,10);
+            
+        //clear line before printing next one
+        uLCD.printf("           ");
+            
+        wait(0.15);
+        uLCD.locate(7,10);
+        uLCD.printf("%s", getCurrentMode());
+            
+        wait(0.15);
+        
+        if (upPB == 0 | rightPB == 0) {
+            CURRENT_MODE++;
+            if (CURRENT_MODE > 4) CURRENT_MODE = 0;
+        } else if (downPB == 0 | leftPB == 0) {
+            CURRENT_MODE--;
+            if (CURRENT_MODE < 0) CURRENT_MODE = 4;
+        } else if (centerPB == 0) {
+            selected = true;
+        } else if (blue.readable()){
+            pc.printf("READABLE Serial\n");
+            if (blue.getc()=='!') {
+            
+                if (blue.getc()=='B') { //button data
+                
+                    bnum = blue.getc(); //button number
+                    
+                    if (blue.getc() == '0') { // push
+                        pc.printf("PUSH\n");
+                    
+                        if (bnum == '5' || bnum == '8') {
+                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                            CURRENT_MODE++;
+                            if (CURRENT_MODE > 4) CURRENT_MODE = 0;
+                        } else if (bnum == '6' || bnum == '7') {
+                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                            CURRENT_MODE--;
+                            if (CURRENT_MODE < 0) CURRENT_MODE = 4;
+                        } else if (bnum == '1') {
+                            pc.printf("BUTTON No. 1"); // RIGHT
+                            selected = true;
+                        }
+                    } // close if release
+                } // if == B
+            }// == !
+        } // if readable && == !
+    }
+    wait(0.9);
     
 }
 
 
 void selection() {
+    
     switch (page) {
         case MAIN:
             pc.printf("MAIN to MENU \n");
             menuScreen();
             break;
+            
         case MENU:
             pc.printf("MENU to ");
             if (line == 0) {
@@ -541,10 +1016,12 @@ void selection() {
                 homeScreen();
             }
             break;
+            
         case VIEW_SETTINGS:
             pc.printf("VIEW SETTINGS to MENU");
             menuScreen();
             break;
+            
         case CHANGE_SETTINGS:
             pc.printf("CHANGE SETTINGS to ");
             if (line == 0) {
@@ -567,6 +1044,7 @@ void selection() {
                 menuScreen();
             }
             break;
+            
         default:
             break;
     }
@@ -591,27 +1069,59 @@ int main() {
     wait(1.0);
     homeScreen();
     
+    char bnum=0;
+    
     while(1) {
         LOCAL_TIME = time(NULL);            //update local time
 
-        //pc.printf("page: %d line: %d \n", page, line);
+        //pc.printf("LOOPING\n");
         if (downPB == 0) {
             pc.printf("Down\n");
-            pc.printf("page: %d line: %d \n", page, line);
             line++;
             updateCursor();
             wait_ms(500);
         } else if (upPB == 0) {
             pc.printf("Up\n");
-            pc.printf("page: %d line: %d \n", page, line);
             line--;
             updateCursor();
             wait_ms(500);
         } else if (centerPB == 0) {
             pc.printf("Center\n");
-            pc.printf("Page : %d line: %d\n", page, line);
             selection();
-        }
+            
+        } else if (blue.readable()){
+            pc.printf("READABLE Serial\n");
+            if (blue.getc()=='!') {
+            
+                if (blue.getc()=='B') { //button data
+                
+                    bnum = blue.getc(); //button number
+                    
+                    if (blue.getc() == '0') { // push
+                        pc.printf("PUSH\n");
+
+                        if (bnum == '5') {
+                            pc.printf("BUTTON 5\n"); // UP
+                            line--;
+                            updateCursor();
+                            wait_ms(500);
+                        } else if (bnum == '6') {
+                            pc.printf("BUTTON 6\n"); // DOWN
+                            line++;
+                            updateCursor();
+                            wait_ms(500);
+                        } else if (bnum == '7') {
+                            pc.printf("BUTTON 7"); // LEFT
+                        } else if (bnum == '8') {
+                            pc.printf("BUTTON 8"); // RIGHT
+                        } else if (bnum == '1') {
+                            pc.printf("BUTTON No. 1"); // RIGHT
+                            selection();
+                        }
+                    } // close if release
+                } // if == B
+            }// == !
+        } // if readable && == !
+    } // while loop
 
 }
-
