@@ -10,6 +10,7 @@ A light alarm clock with custom sunrise/sunset settings
 uLCD_4DGL uLCD(p9,p10,p11); // serial tx, serial rx, reset pin;
 Serial pc(USBTX, USBRX); // tx, rx
 Serial blue(p28,p27);
+Thread thread;
 
 //mbed LEDs
 DigitalOut led1(LED1);
@@ -48,10 +49,11 @@ int line = 0; // value from 0 to n-1 where n = the number of lines on the menu p
 #define GREEN   0x00FF00
 #define BLUE    0x0000FF
 #define PURPLE  0xBFBFBF
+#define PINK    0xFF01ED
 #define WHITE   0xFFFFFF
 #define BLACK   0x000000
 #define LGREY   0xBFBFBF
-#define DGREY   0x5F5F5F
+#define BLUETOOTH   0x5F5F5F // Actually Dark Grey
 
 //Global Settings
 time_t LOCAL_TIME;
@@ -60,6 +62,9 @@ int SNOOZE_DURATION_MIN = 5;
 int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
 volatile int CURRENT_MODE = SLEEP;
 int RAINBOW_COLOR = WHITE;
+volatile int COLOR_WHEEL_COLOR = RED; //should this be an unsigned int???
+volatile bool USE_BLUETOOTH = false;
+volatile int BLUETOOTH_COLOR = WHITE;
 
 int cursor_x = 4;
 int cursor_y = 19;
@@ -130,6 +135,73 @@ char* getCurrentMode() {
     }
 }
 
+char* getCurrentColorWheel() {
+    switch(COLOR_WHEEL_COLOR){
+        case RED:
+            return "RED     ";
+        case ORANGE:
+            return "ORANGE  ";
+        case YELLOW:
+            return "YELLOW  ";
+        case GREEN:
+            return "GREEN   ";
+        case BLUE:
+            return "BLUE    ";
+        case PURPLE:
+            return "PURPLE  ";
+        case PINK:
+            return "PINK    ";
+        case BLUETOOTH:
+            return "BT CW";
+        default:
+            return "n/a    ";
+        }
+}
+
+void changeColorWheel(int upOrDown) { // up is a + number, down is a - number
+    switch (COLOR_WHEEL_COLOR) {
+        case RED:
+            if (upOrDown < 0) COLOR_WHEEL_COLOR = BLUETOOTH;
+            else COLOR_WHEEL_COLOR = ORANGE;
+            USE_BLUETOOTH = false;
+            break;
+        case ORANGE:
+            if (upOrDown < 0) COLOR_WHEEL_COLOR = RED;
+            else COLOR_WHEEL_COLOR = YELLOW;
+            break;
+        case YELLOW:
+            if (upOrDown < 0) COLOR_WHEEL_COLOR = ORANGE;
+            else COLOR_WHEEL_COLOR = GREEN;
+            break;
+        case GREEN:
+            if (upOrDown < 0) COLOR_WHEEL_COLOR = YELLOW;
+            else COLOR_WHEEL_COLOR = BLUE;
+            break;
+        case BLUE:
+            if (upOrDown < 0) COLOR_WHEEL_COLOR = GREEN;
+            else COLOR_WHEEL_COLOR = PURPLE;
+            break;
+        case PURPLE:
+            if (upOrDown < 0) COLOR_WHEEL_COLOR = BLUE;
+            else COLOR_WHEEL_COLOR = PINK;
+            break;
+        case PINK:
+            if (upOrDown < 0) COLOR_WHEEL_COLOR = PURPLE;
+            else COLOR_WHEEL_COLOR = BLUETOOTH;
+            USE_BLUETOOTH = false;
+            break;
+        case BLUETOOTH:
+            if (upOrDown < 0) COLOR_WHEEL_COLOR = PINK;
+            else COLOR_WHEEL_COLOR = RED;
+            USE_BLUETOOTH = true;
+            break;
+        default: 
+            // Should not occur
+            break;
+    }
+
+}
+
 void updateCursor(){ 
     // UPDATE THE PAGE AND INDEX BEFORE CALLING THIS FUNCTION
     // This function does handle line being "out of bounds" 
@@ -181,10 +253,13 @@ void updateCursor(){
             } else if (line == 4) {     // Current Mode
                 cursor_x = 4;
                 cursor_y = 19 + 16 * 4;
-            } else if (line == 5 | line < 0) {     // Back & Save
+            } else if (line == 5) {     // Color Wheel Color
+                cursor_x = 4;
+                cursor_y = 19 + 16 * 5;
+            } else if (line == 6 | line < 0) {     // Back & Save
                 cursor_x = 4;
                 cursor_y = 122;
-                line = 5;
+                line = 6;
             }
             break;
         
@@ -247,8 +322,12 @@ void viewSettingsScreen() {
     uLCD.printf("min");
     uLCD.printf("\n\n");
 
-    //SUNSET/SUNRISE DURATION Line 5
+    //CURRENT MODE Line 5
     uLCD.printf("Mode: %s", getCurrentMode() );
+    uLCD.printf("\n\n");
+
+    //COLOR WHEEL COLOR Line 5
+    uLCD.printf("CW Color: %s", getCurrentColorWheel() );
     uLCD.printf("\n\n");
 
     //SUNSET/SUNRISE DURATION Bottom Line
@@ -309,6 +388,10 @@ void changeSettingsScreen() {
 
     //SUNSET/SUNRISE DURATION Line 5
     uLCD.printf(" Mode: %s", getCurrentMode() );
+    uLCD.printf("\n\n");
+
+    //SUNSET/SUNRISE DURATION Line 6
+    uLCD.printf(" CW Color: %s", getCurrentColorWheel() );
     uLCD.printf("\n\n");
 
     //SUNSET/SUNRISE DURATION Bottom Line
@@ -400,7 +483,7 @@ void homeScreen(){
 
 }
 
-void editVariable(){
+void editVariable(){ // do we use this function??
     //if statements are just to test certain lines
     //ALARM TIME LOCATION
     if(0){
@@ -857,6 +940,55 @@ void updatingMode() {
     
 }
 
+void updatingColorWheelColor() {
+        
+    bool selected = false;
+    char bnum=0;
+    
+    while (!selected) {
+        //min location
+        uLCD.locate(11,12);
+            
+        //clear line before printing next one
+        uLCD.printf("           ");
+            
+        wait(0.15);
+        uLCD.locate(11,12);
+        uLCD.printf("%s", getCurrentColorWheel());
+            
+        wait(0.15);
+        
+        if (upPB == 0 | rightPB == 0) {
+            changeColorWheel(1);
+        } else if (downPB == 0 | leftPB == 0) {
+            changeColorWheel(-1);
+        } else if (centerPB == 0) {
+            selected = true;
+        } else if (blue.readable()){
+            if (blue.getc()=='!') {
+            
+                if (blue.getc()=='B') { //button data
+                
+                    bnum = blue.getc(); //button number
+                    if (blue.getc() == '0') { // push
+                    
+                        if (bnum == '5' || bnum == '8') {
+                            changeColorWheel(1);
+                        } else if (bnum == '6' || bnum == '7') {
+                            changeColorWheel(-1);
+                        } else if (bnum == '1') {
+                            pc.printf("BUTTON No. 1"); // RIGHT
+                            selected = true;
+                        }
+                    } // close if release
+                } // if == B
+            }// == !
+        } // if readable && == !
+    }
+    wait(0.9);
+    
+}
+
 
 void selection() {
     
@@ -902,7 +1034,10 @@ void selection() {
             } else if (line == 4) {
                 pc.printf("Mode \n");
                 updatingMode();
-            } else if (line == 5) {
+            } else if (line == 5) { 
+                pc.printf("COLOR WHEEL COLOR \n");
+                updatingColorWheelColor();
+            } else if (line == 6) {
                 pc.printf("BACK & SAVE \n");
                 menuScreen();
             }
@@ -913,26 +1048,30 @@ void selection() {
     }
 }
 
+////////////////////////////////////////////////////////////////
+///////////// WHERE THE LED CODE GOES //////////////////////////
+////////////////////////////////////////////////////////////////
+
 void led_states() { // thread for all the LED Code 
     while (1) {
         int value = CURRENT_MODE;
         switch (value) {
-            case SLEEP:
+            case SLEEP: // sunset code and "go off" at alarm time and every snooze duration
                 led1 = led4 = 1;
                 led3 = led4 = 0;
                 break;
-            case COLOR_WHEEL:
+            case COLOR_WHEEL: //usse color from COLOR_WHEEL_COLOR or BLUETOOTH (check the USE_BLUETOOTH variable)
                 led1 = led3 = 1;
                 led2 = led4 = 0;
                 break;
-            case RAINBOW:
+            case RAINBOW: // Run through the rainbow
                 led2 = led4 = 1;
                 led1 = led3 = 0.5;
                 break;
-            case LIGHT_ON:
+            case LIGHT_ON: // COLOR = WHITE
                 led1 = led2 = led3 = led4 = 1;
                 break;
-            case LIGHT_OFF:
+            case LIGHT_OFF: // LEDS OFF
                 led1 = led2 = led3 = led4 = 0;
                 break;
             default:
