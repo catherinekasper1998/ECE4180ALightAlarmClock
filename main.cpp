@@ -165,7 +165,6 @@ void updateCursor(){
     switch (page) {
 
         case MAIN:              // line should ever only be 0
-            pc.printf("in main\n");
             Thread::wait(500);      // flash the circle so people know that it is active
             cursor_x = 4;        // does not change
             cursor_y = 99;        // does not change
@@ -217,7 +216,6 @@ void updateCursor(){
             break;
         
         case VIEW_SETTINGS: // SHOULD ONLY EVER BE 0
-            pc.printf("in view settings");
             Thread::wait(500);
             cursor_y = 3;
             cursor_y = 123;
@@ -466,34 +464,26 @@ void updatingAlarm() {
             if (hour < 1) hour = 1; // minimum value
         } else if (centerPB == 0) {
             notdone = false;
-        } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
-          
+        } else if (blue.readable()){          
             if (blue.getc()=='!') {
-
                 if (blue.getc()=='B') { //button data
                     
                     bnum = blue.getc(); //button number
-     
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
                     
-                        if (bnum == '5' || bnum == '8') {
-                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                        if (bnum == '5' || bnum == '8') { // UP & RIGHT
                             hour++;
                             if (hour > 12) hour = 12; // maximum value
-                        } else if (bnum == '6' || bnum == '7') {
-                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                        } else if (bnum == '6' || bnum == '7') { // DOWN & LEFT
                             hour--;
                             if (hour < 1) hour = 1; // minimum value
-                        } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // 1 pressed
+                        } else if (bnum == '1') { // 1 pressed
                             notdone = false;
                         }
                     } // close if release
                 } // if == B
             }// == !
-        } // if readable && == !
+        } // if readable
     }
     //set min
     notdone = true;
@@ -515,8 +505,6 @@ void updatingAlarm() {
         } else if (centerPB == 0) {
             notdone = false;
         } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
-          
             if (blue.getc()=='!') {
 
                 if (blue.getc()=='B') { //button data
@@ -524,18 +512,13 @@ void updatingAlarm() {
                     bnum = blue.getc(); //button number
      
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
-                    
-                        if (bnum == '5' || bnum == '8') {
-                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                        if (bnum == '5' || bnum == '8') { // UP & RIGHT
                             min++;
                             if (hour > 59) hour = 59; // maximum value
-                        } else if (bnum == '6' || bnum == '7') {
-                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                        } else if (bnum == '6' || bnum == '7') { // DOWN & LEFT
                             min--;
                             if (min < 0) min = 0; // minimum value
-                        } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // 1 pressed
+                        } else if (bnum == '1') { // 1 pressed
                             notdone = false;
                         }
                     } // close if release
@@ -561,30 +544,24 @@ void updatingAlarm() {
         } else if (centerPB == 0) {
             notdone = false;
         } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
-          
             if (blue.getc()=='!') {
 
                 if (blue.getc()=='B') { //button data
                     
                     bnum = blue.getc(); //button number
-     
+        
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
-                    
-                        if (bnum == '5' || bnum == '8' || bnum == '6' || bnum == '7') {
-                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT & DOWN & LEFT
+                        
+                        if (bnum == '5' || bnum == '8' || bnum == '6' || bnum == '7') { // UP & RIGHT & DOWN & LEFT
                             if(ampm == 0)ampm = 1;
                             else ampm = 0;
-                        } 
-                        else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // 1 pressed
+                        } else if (bnum == '1') {// 1 pressed
                             notdone = false;
                         }
-                    } // close if release
-                } // if == B
+                    } // close if release '0'
+                } // close if release 'B'
             }// == !
-        } // if readable && == !
+        } // if readable
     }
     
     ALARM_TIME = hour*3600 + min*60 + ampm*43140;//convert into secs (43140 is seconds from 12am to 11:59am)
@@ -623,9 +600,7 @@ void updatingLocal() {
             if (hour < 1) hour = 1; // minimum value
         } else if (centerPB == 0) {
             notdone = false;
-        } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
-          
+        } else if (blue.readable()){          
             if (blue.getc()=='!') {
 
                 if (blue.getc()=='B') { //button data
@@ -633,18 +608,14 @@ void updatingLocal() {
                     bnum = blue.getc(); //button number
      
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
                     
-                        if (bnum == '5' || bnum == '8') {
-                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                        if (bnum == '5' || bnum == '8') { // UP & RIGHT
                             hour++;
                             if (hour > 12) hour = 12; // maximum value
-                        } else if (bnum == '6' || bnum == '7') {
-                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                        } else if (bnum == '6' || bnum == '7') { // DOWN & LEFT
                             hour--;
                             if (hour < 1) hour = 1; // minimum value
-                        } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // 1 pressed
+                        } else if (bnum == '1') { // 1 pressed
                             notdone = false;
                         }
                     } // close if release
@@ -672,8 +643,6 @@ void updatingLocal() {
         } else if (centerPB == 0) {
             notdone = false;
         } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
-          
             if (blue.getc()=='!') {
 
                 if (blue.getc()=='B') { //button data
@@ -681,18 +650,13 @@ void updatingLocal() {
                     bnum = blue.getc(); //button number
      
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
-                    
-                        if (bnum == '5' || bnum == '8') {
-                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                        if (bnum == '5' || bnum == '8') { // UP & RIGHT
                             min++;
                             if (hour > 59) hour = 59; // maximum value
-                        } else if (bnum == '6' || bnum == '7') {
-                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                        } else if (bnum == '6' || bnum == '7') { // DOWN & LEFT
                             min--;
                             if (min < 0) min = 0; // minimum value
-                        } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // 1 pressed
+                        } else if (bnum == '1') { // 1 pressed
                             notdone = false;
                         }
                     } // close if release
@@ -718,8 +682,6 @@ void updatingLocal() {
         } else if (centerPB == 0) {
             notdone = false;
         } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
-          
             if (blue.getc()=='!') {
 
                 if (blue.getc()=='B') { //button data
@@ -727,21 +689,16 @@ void updatingLocal() {
                     bnum = blue.getc(); //button number
      
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
-                    
-                        if (bnum == '5' || bnum == '8' || bnum == '6' || bnum == '7') {
-                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT & DOWN & LEFT
+                        if (bnum == '5' || bnum == '8' || bnum == '6' || bnum == '7') { // UP & RIGHT & DOWN & LEFT
                             if(ampm == 0)ampm = 1;
                             else ampm = 0;
-                        } 
-                        else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // 1 pressed
+                        } else if (bnum == '1') { // 1 pressed
                             notdone = false;
                         }
                     } // close if release
                 } // if == B
             }// == !
-        } // if readable && == !
+        } // if readable
     }
     
     int timeTemp = hour*3600 + min*60 + ampm*43140;//convert into secs (43140 is seconds from 12am to 11:59am)
@@ -775,30 +732,24 @@ void updatingSnooze() {
         } else if (centerPB == 0) {
             selected = true;
         } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
             if (blue.getc()=='!') {
             
                 if (blue.getc()=='B') { //button data
-                
                     bnum = blue.getc(); //button number
                     
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
-                    
-                        if (bnum == '5' || bnum == '8') {
-                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                        if (bnum == '5' || bnum == '8') { // UP & RIGHT
                             SNOOZE_DURATION_MIN++;
                             if (SNOOZE_DURATION_MIN > 30) SNOOZE_DURATION_MIN = 30; // maximum value
-                        } else if (bnum == '6' || bnum == '7') {
-                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                        } else if (bnum == '6' || bnum == '7') { // DOWN & LEFT
                             SNOOZE_DURATION_MIN--;
                             if (SNOOZE_DURATION_MIN < 1) SNOOZE_DURATION_MIN = 1; // minimum value
-                        } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // RIGHT
+                        } else if (bnum == '1') { // RIGHT
                             selected = true;
                         }
                     } // close if release
                 } // if == B
+
             }// == !
         } // if readable && == !
     }
@@ -830,7 +781,6 @@ void updatingSun() {
         } else if (centerPB == 0) {
             selected = true;
         } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
             if (blue.getc()=='!') {
             
                 if (blue.getc()=='B') { //button data
@@ -838,22 +788,19 @@ void updatingSun() {
                     bnum = blue.getc(); //button number
                     
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
                     
-                        if (bnum == '5' || bnum == '8') {
-                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                        if (bnum == '5' || bnum == '8') { // UP & RIGHT
                             SUNRISE_AND_SUNSET_DURATION_MIN++;
                             if (SUNRISE_AND_SUNSET_DURATION_MIN > 60) SUNRISE_AND_SUNSET_DURATION_MIN = 60; // maximum value
-                        } else if (bnum == '6' || bnum == '7') {
-                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                        } else if (bnum == '6' || bnum == '7') { // DOWN & LEFT
                             SUNRISE_AND_SUNSET_DURATION_MIN--;
                             if (SUNRISE_AND_SUNSET_DURATION_MIN < 5) SUNRISE_AND_SUNSET_DURATION_MIN = 5; // minimum value
-                        } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // RIGHT
+                        } else if (bnum == '1') { // RIGHT
                             selected = true;
                         }
                     } // close if release
                 } // if == B
+
             }// == !
         } // if readable && == !
     }
@@ -888,30 +835,23 @@ void updatingMode() {
         } else if (centerPB == 0) {
             selected = true;
         } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
             if (blue.getc()=='!') {
             
                 if (blue.getc()=='B') { //button data
-                
                     bnum = blue.getc(); //button number
-                    
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
-                    
-                        if (bnum == '5' || bnum == '8') {
-                            pc.printf("BUTTON 5 or 8\n"); // UP & RIGHT
+                        if (bnum == '5' || bnum == '8') { // UP & RIGHT
                             CURRENT_MODE++;
                             if (CURRENT_MODE > 4) CURRENT_MODE = 0;
-                        } else if (bnum == '6' || bnum == '7') {
-                            pc.printf("BUTTON 6 or 7\n"); // DOWN & LEFT
+                        } else if (bnum == '6' || bnum == '7') { // DOWN & LEFT
                             CURRENT_MODE--;
                             if (CURRENT_MODE < 0) CURRENT_MODE = 4;
-                        } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // RIGHT
+                        } else if (bnum == '1') { // RIGHT
                             selected = true;
                         }
                     } // close if release
                 } // if == B
+
             }// == !
         } // if readable && == !
     }
@@ -956,7 +896,6 @@ void updatingColorWheelColor() {
                         } else if (bnum == '6' || bnum == '7') {
                             changeColorWheel(-1);
                         } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // RIGHT
                             selected = true;
                         }
                     } // close if release
@@ -973,51 +912,37 @@ void selection() {
     
     switch (page) {
         case MAIN:
-            pc.printf("MAIN to MENU \n");
             menuScreen();
             break;
             
         case MENU:
-            pc.printf("MENU to ");
             if (line == 0) {
-                pc.printf("VIEW SETTINGS\n");
                 viewSettingsScreen();
             } else if (line == 1) {
-                pc.printf("CHANGE SETTINGS\n");
                 changeSettingsScreen();
             } else {
-                pc.printf("MAIN\n");
                 homeScreen();
             }
             break;
             
         case VIEW_SETTINGS:
-            pc.printf("VIEW SETTINGS to MENU");
             menuScreen();
             break;
             
         case CHANGE_SETTINGS:
-            pc.printf("CHANGE SETTINGS to ");
             if (line == 0) {
-                pc.printf("ALARM TIME\n");
                 updatingAlarm();
             } else if (line == 1) {
-                pc.printf("LOCAL TIME \n");
                 updatingLocal();
             } else if (line == 2) {
-                pc.printf("SNOOZE DUR \n");
                 updatingSnooze();
             } else if (line == 3) {
-                pc.printf("SUN DUR \n");
                 updatingSun();
             } else if (line == 4) {
-                pc.printf("Mode \n");
                 updatingMode();
             } else if (line == 5) { 
-                pc.printf("COLOR WHEEL COLOR \n");
                 updatingColorWheelColor();
             } else if (line == 6) {
-                pc.printf("BACK & SAVE \n");
                 menuScreen();
             }
             break;
@@ -1043,14 +968,6 @@ void led_states() { // thread for all the LED Code
                 led1 = led3 = 1;
                 led2 = led4 = 0;
                 bool enter = false;
-                if (USE_BLUETOOTH){
-                    enter = true;
-                    while (blue.readable()){
-                        pc.printf("%d", blue.getc());
-                    }
-                } else if (enter) {
-                    pc.printf("\n");
-                }
                 break;
             case RAINBOW: // Run through the rainbow
                 led2 = led4 = 1;
@@ -1090,59 +1007,40 @@ int main() {
     char bnum=0;
 
     thread.start(led_states);
+    int counter = 0;
     
     while(1) {
         LOCAL_TIME = time(NULL);            //update local time
 
-        //pc.printf("LOOPING\n");
         if (downPB == 0) {
-            pc.printf("Down\n");
             line++;
             updateCursor();
             Thread::wait(500);
         } else if (upPB == 0) {
-            pc.printf("Up\n");
             line--;
             updateCursor();
             Thread::wait(500);
         } else if (centerPB == 0) {
-            pc.printf("Center\n");
             selection();
-            
         } else if (blue.readable()){
-            pc.printf("READABLE Serial\n");
             if (blue.getc()=='!') {
-
                 bnum = blue.getc();
             
                 if (bnum == 'B') { //button data
-                
                     bnum = blue.getc(); //button number
-                    
                     if (blue.getc() == '0') { // push
-                        pc.printf("PUSH\n");
-
-                        if (bnum == '5') {
-                            pc.printf("BUTTON 5\n"); // UP
+                        if (bnum == '5') { // UP
                             line--;
                             updateCursor();
                             Thread::wait(500);
-                        } else if (bnum == '6') {
-                            pc.printf("BUTTON 6\n"); // DOWN
+                        } else if (bnum == '6') { // DOWN
                             line++;
                             updateCursor();
                             Thread::wait(500);
-                        } else if (bnum == '7') {
-                            pc.printf("BUTTON 7"); // LEFT
-                        } else if (bnum == '8') {
-                            pc.printf("BUTTON 8"); // RIGHT
-                        } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // RIGHT
+                        } else if (bnum == '1') { // RIGHT
                             selection();
                         }
-                    } else {// close if release
-                        pc.printf("NOT 0\n");
-                    }
+                    } 
                 } else if (bnum == 'C'){// == !
                     pc.printf("C\n");
                     int i = 0;
@@ -1166,10 +1064,22 @@ int main() {
                     pc.printf("\n");
                     pc.printf("Summary R: %d, B: %d, G: %d, W: %d", r, g, b, w); // This shows the value in base 10
                 }
-            } else { // if NOT !
-                pc.printf("Not !!\n");
-            }
+            } 
         } // if readable
+
+        Thread::wait(50); // 50 * 20 * 60 = 60 seconds
+        // rewrite the time every 60 seconds
+        if (counter == 20 * 60) {
+            counter = 0;
+            uLCD.text_width(2.5); 
+            uLCD.text_height(2.5);
+            uLCD.locate(0.5,2.5);
+            //Pull current time and set it to a charArray
+            char curTime[32];
+            strftime(curTime, 32, "%I:%M %p\n", localtime(&LOCAL_TIME));
+            uLCD.printf("%s", curTime);
+        }
+        counter++;
     } // while loop
 
 }
