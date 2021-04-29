@@ -71,53 +71,6 @@ int cursor_y = 19;
 int cursor_radius = 2;
 int cursor_color = RED;
 
-int charToInt(char character) {
-    pc.printf("Char to int input %c\n", character);
-    switch (character) {
-        case '0':
-            pc.printf("output %d\n", 0);
-            return 0;
-        case '1':
-            pc.printf("output %d\n", 1);
-            return 1;
-        case '2':
-            pc.printf("output %d\n", 2);
-            return 2;
-        case '3':
-            pc.printf("output %d\n", 3);
-            return 3;
-        case '4':
-            pc.printf("output %d\n", 4);
-            return 4;
-        case '5':
-            pc.printf("output %d\n", 5);
-            return 5;
-        case '6':
-            pc.printf("output %d\n", 6);
-            return 6;
-        case '7':
-            pc.printf("output %d\n", 7);
-            return 7;
-        case '8':
-            pc.printf("output %d\n", 8);
-            return 8;
-        case '9':
-            pc.printf("output %d\n", 9);
-            return 9;
-        default:
-            pc.printf("ERROR IN CHAR TO INT");
-            return -1;
-    }
-}
-
-int getIntHr(char* time) {
-    return (charToInt(time[0]) * 10) + charToInt(time[1]);
-}
-
-int getIntMin(char* time) {
-    return (charToInt(time[0]) * 10) + charToInt(time[1]);
-}
-
 char* getCurrentMode() {
     switch(CURRENT_MODE){
         case SLEEP:
@@ -483,127 +436,6 @@ void homeScreen(){
 
 }
 
-//CAN PROBABLY BE DELETED
-void editVariable(){
-    //if statements are just to test certain lines
-    //ALARM TIME LOCATION
-    if(0){
-        //hour location
-        uLCD.locate(8,2);
-        
-        uLCD.printf("  ");
-        Thread::wait(500);
-        uLCD.locate(8,2);
-        uLCD.printf("12");
-        Thread::wait(500);
-        
-        //min location
-        uLCD.locate(11,2);
-        
-        uLCD.printf("  ");
-        Thread::wait(500);
-        uLCD.locate(11,2);
-        uLCD.printf("59");
-        Thread::wait(500);
-        
-        //am/pm
-        uLCD.locate(13,2);
-        
-        uLCD.printf("  ");
-        Thread::wait(500);
-        uLCD.locate(13,2);
-        uLCD.printf("am");
-        Thread::wait(500);
-    }
-    //LOCAL TIME LOCATION
-    if (0) {
-        //hour location
-        uLCD.locate(8,4);
-        
-        uLCD.printf("  ");
-        Thread::wait(500);
-        uLCD.locate(8,4);
-        uLCD.printf("12");
-        Thread::wait(500);
-        
-        //min location
-        uLCD.locate(11,4);
-        
-        uLCD.printf("  ");
-        Thread::wait(500);
-        uLCD.locate(11,4);
-        uLCD.printf("59");
-        Thread::wait(500);
-        
-        //am/pm
-        uLCD.locate(13,4);
-        
-        uLCD.printf("  ");
-        Thread::wait(500);
-        uLCD.locate(13,4);
-        uLCD.printf("am");
-        Thread::wait(500);
-    }
-    //SNOOZE DUR LOCATION
-    if(0){
-        //min location
-        uLCD.locate(13,6);
-        
-        uLCD.printf("  ");
-        Thread::wait(500);
-        uLCD.locate(13,6);
-        uLCD.printf("15");
-        Thread::wait(500);
-    }
-    //SUNSET DUR LOCATION
-    if(0){
-        //min location
-        uLCD.locate(13,8);
-        
-        uLCD.printf("  ");
-        Thread::wait(500);
-        uLCD.locate(13,8);
-        uLCD.printf("30");
-        Thread::wait(500);
-    }
-    //MODE LOCATION
-    if(1) {
-        
-        for(int modeInt = 0; modeInt < 5; modeInt++){
-            //min location
-            uLCD.locate(7,10);
-            
-            //clear line before printing next one
-            uLCD.printf("           ");
-            
-            Thread::wait(1000);
-            uLCD.locate(7,10);
-            switch(modeInt){
-                case SLEEP:
-                    uLCD.printf("Sleep");
-                    break;
-                case COLOR_WHEEL:
-                    uLCD.printf("Color Wheel");
-                    break;
-                case RAINBOW:
-                    uLCD.printf("Rainbow");
-                    break;
-                case LIGHT_ON:
-                    uLCD.printf("Light On");
-                    break;
-                case LIGHT_OFF:
-                    uLCD.printf("Light Off");
-                    break;
-                default:
-                    uLCD.printf("n/a");
-                    break;
-            }//end switch
-            Thread::wait(1000);
-        }//end for
-    }//end if
-}
-//END OF PROBABLY CAN BE DELETED
-
 void updatingAlarm() {
     //hour, min, am/pm vars
     int hour = 1;
@@ -626,7 +458,15 @@ void updatingAlarm() {
         uLCD.printf("%d", hour);
         wait(0.15);
             
-        if (blue.readable()){
+        if (upPB == 0 | rightPB == 0) {
+            hour++;
+            if (hour > 12) hour = 12; // maximum value
+        } else if (downPB == 0 | leftPB == 0) {
+            hour--;
+            if (hour < 1) hour = 1; // minimum value
+        } else if (centerPB == 0) {
+            notdone = false;
+        } else if (blue.readable()){
             pc.printf("READABLE Serial\n");
           
             if (blue.getc()=='!') {
@@ -666,7 +506,15 @@ void updatingAlarm() {
         uLCD.printf("%d", min);
         wait(0.15);
             
-        if (blue.readable()){
+        if (upPB == 0 | rightPB == 0) {
+            min++;
+            if (hour > 59) hour = 59; // maximum value
+        } else if (downPB == 0 | leftPB == 0) {
+            min--;
+            if (min < 0) min = 0; // minimum value
+        } else if (centerPB == 0) {
+            notdone = false;
+        } else if (blue.readable()){
             pc.printf("READABLE Serial\n");
           
             if (blue.getc()=='!') {
@@ -707,7 +555,12 @@ void updatingAlarm() {
         else uLCD.printf("PM");
         wait(0.15);
             
-        if (blue.readable()){
+        if (upPB == 0 || rightPB == 0 || downPB == 0 || leftPB == 0) {
+            if(ampm == 0)ampm = 1;
+            else ampm = 0;
+        } else if (centerPB == 0) {
+            notdone = false;
+        } else if (blue.readable()){
             pc.printf("READABLE Serial\n");
           
             if (blue.getc()=='!') {
@@ -761,8 +614,16 @@ void updatingLocal() {
         uLCD.locate(8,4);
         uLCD.printf("%d", hour);
         wait(0.15);
-            
-        if (blue.readable()){
+
+        if (upPB == 0 | rightPB == 0) {
+            hour++;
+            if (hour > 12) hour = 12; // maximum value
+        } else if (downPB == 0 | leftPB == 0) {
+            hour--;
+            if (hour < 1) hour = 1; // minimum value
+        } else if (centerPB == 0) {
+            notdone = false;
+        } else if (blue.readable()){
             pc.printf("READABLE Serial\n");
           
             if (blue.getc()=='!') {
@@ -802,7 +663,15 @@ void updatingLocal() {
         uLCD.printf("%d", min);
         wait(0.15);
             
-        if (blue.readable()){
+        if (upPB == 0 | rightPB == 0) {
+            min++;
+            if (hour > 59) hour = 59; // maximum value
+        } else if (downPB == 0 | leftPB == 0) {
+            min--;
+            if (min < 0) min = 0; // minimum value
+        } else if (centerPB == 0) {
+            notdone = false;
+        } else if (blue.readable()){
             pc.printf("READABLE Serial\n");
           
             if (blue.getc()=='!') {
@@ -843,7 +712,12 @@ void updatingLocal() {
         else uLCD.printf("PM");
         wait(0.15);
             
-        if (blue.readable()){
+        if (upPB == 0 || rightPB == 0 || downPB == 0 || leftPB == 0) {
+            if(ampm == 0)ampm = 1;
+            else ampm = 0;
+        } else if (centerPB == 0) {
+            notdone = false;
+        } else if (blue.readable()){
             pc.printf("READABLE Serial\n");
           
             if (blue.getc()=='!') {
@@ -873,33 +747,6 @@ void updatingLocal() {
     int timeTemp = hour*3600 + min*60 + ampm*43140;//convert into secs (43140 is seconds from 12am to 11:59am)
     set_time(timeTemp);
     wait(0.9);
-    /*
-    uLCD.locate(8,4);
-        
-    uLCD.printf("  ");
-    wait(0.5);
-    uLCD.locate(8,4);
-    uLCD.printf("12");
-    wait(0.5);
-        
-    //min location
-    uLCD.locate(11,4);
-        
-    uLCD.printf("  ");
-    wait(0.5);
-    uLCD.locate(11,4);
-    uLCD.printf("59");
-    wait(0.5);
-        
-    //am/pm
-    uLCD.locate(14,4);
-        
-    uLCD.printf("  ");
-    wait(0.5);
-    uLCD.locate(14,4);
-    uLCD.printf("am");
-    wait(0.5);
-    */
 }
 
 
@@ -1323,30 +1170,6 @@ int main() {
                 pc.printf("Not !!\n");
             }
         } // if readable
-    } // while loop
-
-                        if (bnum == '5') {
-                            pc.printf("BUTTON 5\n"); // UP
-                            line--;
-                            updateCursor();
-                            wait_ms(500);
-                        } else if (bnum == '6') {
-                            pc.printf("BUTTON 6\n"); // DOWN
-                            line++;
-                            updateCursor();
-                            wait_ms(500);
-                        } else if (bnum == '7') {
-                            pc.printf("BUTTON 7"); // LEFT
-                        } else if (bnum == '8') {
-                            pc.printf("BUTTON 8"); // RIGHT
-                        } else if (bnum == '1') {
-                            pc.printf("BUTTON No. 1"); // RIGHT
-                            selection();
-                        }
-                    } // close if release
-                } // if == B
-            }// == !
-        } // if readable && == !
     } // while loop
 
 }
