@@ -152,7 +152,7 @@ char* getCurrentColorWheel() {
         case PINK:
             return "PINK    ";
         case BLUETOOTH:
-            return "BT CW";
+            return "BT CW   ";
         default:
             return "n/a    ";
         }
@@ -213,7 +213,7 @@ void updateCursor(){
 
         case MAIN:              // line should ever only be 0
             pc.printf("in main\n");
-            wait_ms(500);      // flash the circle so people know that it is active
+            Thread::wait(500);      // flash the circle so people know that it is active
             cursor_x = 4;        // does not change
             cursor_y = 99;        // does not change
             line = 0;
@@ -265,7 +265,7 @@ void updateCursor(){
         
         case VIEW_SETTINGS: // SHOULD ONLY EVER BE 0
             pc.printf("in view settings");
-            wait_ms(500);
+            Thread::wait(500);
             cursor_y = 3;
             cursor_y = 123;
             line = 0;
@@ -491,28 +491,28 @@ void editVariable(){ // do we use this function??
         uLCD.locate(8,2);
         
         uLCD.printf("  ");
-        wait(0.5);
+        Thread::wait(500);
         uLCD.locate(8,2);
         uLCD.printf("12");
-        wait(0.5);
+        Thread::wait(500);
         
         //min location
         uLCD.locate(11,2);
         
         uLCD.printf("  ");
-        wait(0.5);
+        Thread::wait(500);
         uLCD.locate(11,2);
         uLCD.printf("59");
-        wait(0.5);
+        Thread::wait(500);
         
         //am/pm
         uLCD.locate(13,2);
         
         uLCD.printf("  ");
-        wait(0.5);
+        Thread::wait(500);
         uLCD.locate(13,2);
         uLCD.printf("am");
-        wait(0.5);
+        Thread::wait(500);
     }
     //LOCAL TIME LOCATION
     if (0) {
@@ -520,28 +520,28 @@ void editVariable(){ // do we use this function??
         uLCD.locate(8,4);
         
         uLCD.printf("  ");
-        wait(0.5);
+        Thread::wait(500);
         uLCD.locate(8,4);
         uLCD.printf("12");
-        wait(0.5);
+        Thread::wait(500);
         
         //min location
         uLCD.locate(11,4);
         
         uLCD.printf("  ");
-        wait(0.5);
+        Thread::wait(500);
         uLCD.locate(11,4);
         uLCD.printf("59");
-        wait(0.5);
+        Thread::wait(500);
         
         //am/pm
         uLCD.locate(13,4);
         
         uLCD.printf("  ");
-        wait(0.5);
+        Thread::wait(500);
         uLCD.locate(13,4);
         uLCD.printf("am");
-        wait(0.5);
+        Thread::wait(500);
     }
     //SNOOZE DUR LOCATION
     if(0){
@@ -549,10 +549,10 @@ void editVariable(){ // do we use this function??
         uLCD.locate(13,6);
         
         uLCD.printf("  ");
-        wait(0.5);
+        Thread::wait(500);
         uLCD.locate(13,6);
         uLCD.printf("15");
-        wait(0.5);
+        Thread::wait(500);
     }
     //SUNSET DUR LOCATION
     if(0){
@@ -560,10 +560,10 @@ void editVariable(){ // do we use this function??
         uLCD.locate(13,8);
         
         uLCD.printf("  ");
-        wait(0.5);
+        Thread::wait(500);
         uLCD.locate(13,8);
         uLCD.printf("30");
-        wait(0.5);
+        Thread::wait(500);
     }
     //MODE LOCATION
     if(1) {
@@ -575,7 +575,7 @@ void editVariable(){ // do we use this function??
             //clear line before printing next one
             uLCD.printf("           ");
             
-            wait(1);
+            Thread::wait(1000);
             uLCD.locate(7,10);
             switch(modeInt){
                 case SLEEP:
@@ -597,14 +597,14 @@ void editVariable(){ // do we use this function??
                     uLCD.printf("n/a");
                     break;
             }//end switch
-            wait(1);
+            Thread::wait(1000);
         }//end for
     }//end if
 }
 
 void updatingAlarm() {
     // the flashing function
-    wait(0.8);
+    Thread::wait(800);
     
     int currentLocation = 0;
     bool notDone = true;
@@ -625,7 +625,7 @@ void updatingAlarm() {
             case 0:
                 uLCD.locate(8,2);
                 uLCD.printf("  ");
-                wait(0.15);
+                Thread::wait(150);
 
                 uLCD.locate(8,2);
 
@@ -634,7 +634,7 @@ void updatingAlarm() {
                 } else {
                     uLCD.printf("0%d", hr_val);
                 }
-                wait(0.15);
+                Thread::wait(150);
                  pc.printf("Is this looping? casse 0 \n");
 
                 if (upPB == 0) {
@@ -663,7 +663,7 @@ void updatingAlarm() {
                 uLCD.locate(11,2);
                     
                 uLCD.printf("  ");
-                wait(0.15);
+                Thread::wait(150);
                 uLCD.locate(11,2);
                 if (min_val > 9) {
                     uLCD.printf("%d", min_val);
@@ -671,7 +671,7 @@ void updatingAlarm() {
                     uLCD.printf("0%d", min_val);
                 }
                 
-                wait(0.15);
+                Thread::wait(150);
                 
                 if (upPB == 0) {
                     // increase value
@@ -684,15 +684,15 @@ void updatingAlarm() {
                 } else if (leftPB == 0) {
                     // move to AM
                     currentLocation--; // to 0
-                    wait(0.7);
+                    Thread::wait(0.7);
                 } else if (rightPB == 0) {
                     // move to min
                     currentLocation++; // to 2
-                    wait(0.7);
+                    Thread::wait(0.7);
                 } else if (centerPB == 0) {
                     // save value -> exit update Alarm
                     notDone = false;
-                    wait(0.8);
+                    Thread::wait(800);
                 }
                 break;
 
@@ -701,7 +701,7 @@ void updatingAlarm() {
                 uLCD.locate(14,2);
                 
                 uLCD.printf("  ");
-                wait(0.15);
+                Thread::wait(150);
                 uLCD.locate(14,2);
 
                 if (am_var) {
@@ -710,7 +710,7 @@ void updatingAlarm() {
                     uLCD.printf("PM");
                 }
 
-                wait(0.15);
+                Thread::wait(150);
 
                 if (upPB == 0 | downPB == 0) {
                     // increase value
@@ -746,28 +746,28 @@ void updatingLocal() {
     uLCD.locate(8,4);
         
     uLCD.printf("  ");
-    wait(0.5);
+    Thread::wait(500);
     uLCD.locate(8,4);
     uLCD.printf("12");
-    wait(0.5);
+    Thread::wait(500);
         
     //min location
     uLCD.locate(11,4);
         
     uLCD.printf("  ");
-    wait(0.5);
+    Thread::wait(500);
     uLCD.locate(11,4);
     uLCD.printf("59");
-    wait(0.5);
+    Thread::wait(500);
         
     //am/pm
     uLCD.locate(13,4);
         
     uLCD.printf("  ");
-    wait(0.5);
+    Thread::wait(500);
     uLCD.locate(13,4);
     uLCD.printf("am");
-    wait(0.5);
+    Thread::wait(500);
 
 }
 
@@ -782,10 +782,10 @@ void updatingSnooze() {
         uLCD.locate(12,6);
         
         uLCD.printf("  ");
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(12,6);
         uLCD.printf("%d", SNOOZE_DURATION_MIN);
-        wait(0.15);
+        Thread::wait(150);
         
         if (upPB == 0 | rightPB == 0) {
             SNOOZE_DURATION_MIN++;
@@ -823,7 +823,7 @@ void updatingSnooze() {
             }// == !
         } // if readable && == !
     }
-    wait(0.9);
+    Thread::wait(900);
 
 }
 
@@ -837,10 +837,10 @@ void updatingSun() {
         uLCD.locate(13,8);
         
         uLCD.printf("  ");
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(13,8);
         uLCD.printf("%d", SUNRISE_AND_SUNSET_DURATION_MIN);
-        wait(0.15);
+        Thread::wait(150);
         
         if (upPB == 0 | rightPB == 0) {
             SUNRISE_AND_SUNSET_DURATION_MIN++;
@@ -878,7 +878,7 @@ void updatingSun() {
             }// == !
         } // if readable && == !
     }
-    wait(0.9);
+    Thread::wait(900);
 
 }
 
@@ -894,11 +894,11 @@ void updatingMode() {
         //clear line before printing next one
         uLCD.printf("           ");
             
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(7,10);
         uLCD.printf("%s", getCurrentMode());
             
-        wait(0.15);
+        Thread::wait(150);
         
         if (upPB == 0 | rightPB == 0) {
             CURRENT_MODE++;
@@ -936,7 +936,7 @@ void updatingMode() {
             }// == !
         } // if readable && == !
     }
-    wait(0.9);
+    Thread::wait(900);
     
 }
 
@@ -952,11 +952,11 @@ void updatingColorWheelColor() {
         //clear line before printing next one
         uLCD.printf("           ");
             
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(11,12);
         uLCD.printf("%s", getCurrentColorWheel());
             
-        wait(0.15);
+        Thread::wait(150);
         
         if (upPB == 0 | rightPB == 0) {
             changeColorWheel(1);
@@ -985,7 +985,7 @@ void updatingColorWheelColor() {
             }// == !
         } // if readable && == !
     }
-    wait(0.9);
+    Thread::wait(900);
     
 }
 
@@ -1063,6 +1063,15 @@ void led_states() { // thread for all the LED Code
             case COLOR_WHEEL: //usse color from COLOR_WHEEL_COLOR or BLUETOOTH (check the USE_BLUETOOTH variable)
                 led1 = led3 = 1;
                 led2 = led4 = 0;
+                bool enter = false;
+                if (USE_BLUETOOTH){
+                    enter = true;
+                    while (blue.readable()){
+                        pc.printf("%d", blue.getc());
+                    }
+                } else if (enter) {
+                    pc.printf("\n");
+                }
                 break;
             case RAINBOW: // Run through the rainbow
                 led2 = led4 = 1;
@@ -1096,7 +1105,7 @@ int main() {
     rightPB.mode(PullUp);
     centerPB.mode(PullUp);
 
-    wait(1.0);
+    Thread::wait(1.0);
     homeScreen();
     
     char bnum=0;
@@ -1111,12 +1120,12 @@ int main() {
             pc.printf("Down\n");
             line++;
             updateCursor();
-            wait_ms(500);
+            Thread::wait(500);
         } else if (upPB == 0) {
             pc.printf("Up\n");
             line--;
             updateCursor();
-            wait_ms(500);
+            Thread::wait(500);
         } else if (centerPB == 0) {
             pc.printf("Center\n");
             selection();
@@ -1124,8 +1133,10 @@ int main() {
         } else if (blue.readable()){
             pc.printf("READABLE Serial\n");
             if (blue.getc()=='!') {
+
+                bnum = blue.getc();
             
-                if (blue.getc()=='B') { //button data
+                if (bnum == 'B') { //button data
                 
                     bnum = blue.getc(); //button number
                     
@@ -1136,12 +1147,12 @@ int main() {
                             pc.printf("BUTTON 5\n"); // UP
                             line--;
                             updateCursor();
-                            wait_ms(500);
+                            Thread::wait(500);
                         } else if (bnum == '6') {
                             pc.printf("BUTTON 6\n"); // DOWN
                             line++;
                             updateCursor();
-                            wait_ms(500);
+                            Thread::wait(500);
                         } else if (bnum == '7') {
                             pc.printf("BUTTON 7"); // LEFT
                         } else if (bnum == '8') {
@@ -1150,10 +1161,36 @@ int main() {
                             pc.printf("BUTTON No. 1"); // RIGHT
                             selection();
                         }
-                    } // close if release
-                } // if == B
-            }// == !
-        } // if readable && == !
+                    } else {// close if release
+                        pc.printf("NOT 0\n");
+                    }
+                } else if (bnum == 'C'){// == !
+                    pc.printf("C\n");
+                    int i = 0;
+                    int r, g, b, w = 0;
+                    char value = 0;
+                    while (blue.readable()) {
+                        pc.printf("i: %d", i);
+                        value = blue.getc();
+                        pc.printf("%d", value);
+                        if (i == 0) {
+                            r = value;
+                        } else if (i == 1) {
+                            g = value;
+                        } else if (i == 2) {
+                            b = value;
+                        } else if (i == 3) {
+                            w = value;
+                        }
+                        i++;
+                    }
+                    pc.printf("\n");
+                    pc.printf("Summary R: %d, B: %d, G: %d, W: %d", r, g, b, w); // This shows the value in base 10
+                }
+            } else { // if NOT !
+                pc.printf("Not !!\n");
+            }
+        } // if readable
     } // while loop
 
 }
