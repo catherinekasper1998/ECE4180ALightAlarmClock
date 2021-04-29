@@ -1,7 +1,6 @@
 #include "mbed.h"
 #include "uLCD_4DGL.h"
-BusOut myled(LED1,LED2,LED3,LED4);
-Serial blue(p28,p27);
+#include "rtos.h"
 
 /*
 Final Project for 4180.
@@ -10,6 +9,7 @@ A light alarm clock with custom sunrise/sunset settings
 //LCD screen
 uLCD_4DGL uLCD(p9,p10,p11); // serial tx, serial rx, reset pin;
 Serial pc(USBTX, USBRX); // tx, rx
+Serial blue(p28,p27);
 
 //mbed LEDs
 DigitalOut led1(LED1);
@@ -58,7 +58,7 @@ time_t LOCAL_TIME;
 time_t ALARM_TIME;
 int SNOOZE_DURATION_MIN = 5;
 int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
-int CURRENT_MODE = SLEEP;
+volatile int CURRENT_MODE = SLEEP;
 int RAINBOW_COLOR = WHITE;
 
 int cursor_x = 4;
@@ -913,6 +913,34 @@ void selection() {
     }
 }
 
+void led_states() { // thread for all the LED Code 
+    while (1) {
+        int value = CURRENT_MODE;
+        switch (value) {
+            case SLEEP:
+                led1 = led4 = 1;
+                led3 = led4 = 0;
+                break;
+            case COLOR_WHEEL:
+                led1 = led3 = 1;
+                led2 = led4 = 0;
+                break;
+            case RAINBOW:
+                led2 = led4 = 1;
+                led1 = led3 = 0.5;
+                break;
+            case LIGHT_ON:
+                led1 = led2 = led3 = led4 = 1;
+                break;
+            case LIGHT_OFF:
+                led1 = led2 = led3 = led4 = 0;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 
 int main() {
     // ahh
@@ -933,6 +961,8 @@ int main() {
     homeScreen();
     
     char bnum=0;
+
+    thread.start(led_states);
     
     while(1) {
         LOCAL_TIME = time(NULL);            //update local time
