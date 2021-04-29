@@ -62,9 +62,9 @@ int SNOOZE_DURATION_MIN = 5;
 int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
 volatile int CURRENT_MODE = SLEEP;
 int RAINBOW_COLOR = WHITE;
-volatile int COLOR_WHEEL_COLOR = RED; //should this be an unsigned int???
+volatile int COLOR_WHEEL_COLOR = RED; // this is a state variable 
 volatile bool USE_BLUETOOTH = false;
-volatile int BLUETOOTH_COLOR = WHITE;
+volatile int BLUETOOTH_COLOR = WHITE; // This is what bluetooth color wheel color should be set yo
 
 int cursor_x = 4;
 int cursor_y = 19;
