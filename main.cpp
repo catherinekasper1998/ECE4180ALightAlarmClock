@@ -1,6 +1,7 @@
 #include "mbed.h"
 #include "uLCD_4DGL.h"
 #include "rtos.h"
+#include "TI_NEOPIXEL.h"
 
 /*
 Final Project for 4180.
@@ -12,12 +13,15 @@ Serial pc(USBTX, USBRX); // tx, rx
 Serial blue(p28,p27);
 Thread thread;
 
+TI_NEOPIXEL var(p13);
+int ring_number = 12;
+int start = 0;
+int finish = 12;
 //ADD TO MAIN BRANCH
 Thread speakerThread;
 Thread sunriseThread;
 //speaker
 PwmOut speaker(p21);
-
 
 //mbed LEDs
 DigitalOut led1(LED1);
@@ -72,6 +76,9 @@ int RAINBOW_COLOR = WHITE;
 volatile int COLOR_WHEEL_COLOR = RED; // this is a state variable 
 volatile bool USE_BLUETOOTH = false;
 volatile int BLUETOOTH_COLOR = WHITE; // This is what bluetooth color wheel color should be set yo
+volatile int BLUETOOTH_RED = 0;
+volatile int BLUETOOTH_GREEN = 0;
+volatile int BLUETOOTH_BLUE = 0;
 
 int cursor_x = 4;
 int cursor_y = 19;
@@ -864,6 +871,11 @@ void updatingMode() {
     }
     Thread::wait(900);
     
+    //once selected if in sleep set leds to 0
+    if(CURRENT_MODE == 0){
+        var.changeColor(ring_number, (rgb_color) {0,0,0});
+        Thread::wait(500);
+    }
 }
 
 void updatingColorWheelColor() {
@@ -963,28 +975,109 @@ void selection() {
 ///////////// WHERE THE LED CODE GOES //////////////////////////
 ////////////////////////////////////////////////////////////////
 
+void sunrise() {
+ for (int i = 1; i<ring_number+1; i++)
+    {
+    var.switchLightOff(ring_number);
+    var.switchLightOn(ring_number);
+    var.changeColor(ring_number, (rgb_color) {20*i,0,0});
+    Thread::wait(500);
+    }  
+}
+
+void lightOn() {
+    var.switchLightOff(ring_number);
+    var.switchLightOn(ring_number);
+    var.changeColor(ring_number, (rgb_color) {255,255,255});
+    Thread::wait(500);
+}
+
+void lightRainbow() {
+    var.switchLightOff(ring_number);
+    var.switchLightOn(ring_number);
+    var.circleRainbow(ring_number);
+    Thread::wait(500);
+}
+
+void lightOff() {
+    var.changeColor(ring_number, (rgb_color) {0,0,0});
+    Thread::wait(500);
+}
+
+void lightColorWheel() {
+    if (USE_BLUETOOTH) {
+        var.changeColor(ring_number, (rgb_color) {BLUETOOTH_RED, BLUETOOTH_GREEN, BLUETOOTH_BLUE});
+    } else {
+        switch (COLOR_WHEEL_COLOR) {
+            case RED:
+                var.changeColor(ring_number, (rgb_color) {255, 0, 0});
+                break;
+            case ORANGE:
+                var.changeColor(ring_number, (rgb_color) {255, 150, 0});
+                break;
+            case YELLOW:
+                var.changeColor(ring_number, (rgb_color) {255, 255, 0});
+                break;
+            case GREEN:
+                var.changeColor(ring_number, (rgb_color) {0, 255, 0});
+                break;
+            case BLUE:
+                var.changeColor(ring_number, (rgb_color) {0, 0, 255});
+                break;
+            case PURPLE:
+                var.changeColor(ring_number, (rgb_color) {120, 0, 120});
+                break;
+            case PINK:
+                var.changeColor(ring_number, (rgb_color) {255, 20, 147});
+                break;
+            case BLUETOOTH:
+                var.changeColor(ring_number, (rgb_color) {BLUETOOTH_RED, BLUETOOTH_GREEN, BLUETOOTH_BLUE});
+                break;
+            default:
+                var.changeColor(ring_number, (rgb_color) {255, 255, 255});
+                break;
+        }
+    }
+    Thread::wait(500);
+}
+
 void led_states() { // thread for all the LED Code 
+
+    //lights init off
+    var.changeColor(ring_number, (rgb_color) {0,0,0});
+    Thread::wait(500);
+    
     while (1) {
         int value = CURRENT_MODE;
         switch (value) {
+            /*
             case SLEEP: // sunset code and "go off" at alarm time and every snooze duration
                 led1 = led4 = 1;
                 led3 = led4 = 0;
+                if(inSleep){
+                    var.changeColor(ring_number, (rgb_color) {0,0,0});
+                    Thread::wait(500);
+                    inSleep = false;               
+                }
                 break;
+            */
             case COLOR_WHEEL: //usse color from COLOR_WHEEL_COLOR or BLUETOOTH (check the USE_BLUETOOTH variable)
                 led1 = led3 = 1;
                 led2 = led4 = 0;
-                bool enter = false;
+                lightColorWheel();
                 break;
             case RAINBOW: // Run through the rainbow
                 led2 = led4 = 1;
                 led1 = led3 = 0.5;
+                lightRainbow();
                 break;
             case LIGHT_ON: // COLOR = WHITE
                 led1 = led2 = led3 = led4 = 1;
+                lightOn();
                 break;
             case LIGHT_OFF: // LEDS OFF
                 led1 = led2 = led3 = led4 = 0;
+                lightOff();
                 break;
             default:
                 break;
@@ -1003,14 +1096,22 @@ void playAlarmSound(){
 }
 
 void startSunrise(){
-    /*
-    //Just some sudo code to get started can do more with LEDs hooked up
-    while(1){
-        //as the local time gets closer to the alarm time it gets brighter
-        LED = (LOCAL_TIME%86400) / ALARM_TIME;
-        Thread::wait(1000);//increment every 1 second
-    }
-    */
+    
+    int maxTime = 60*SUNRISE_AND_SUNSET_DURATION_MIN*10;
+    
+    for(int i = 0; i < maxTime; i++){
+        int val = 255*((float)i/(float)maxTime);
+        if(i < maxTime/3){//gets mroe red
+            var.changeColor(ring_number, (rgb_color) {val, 0, 0});
+        }//end if
+        else if(i < 2*maxTime/3){//gets more red and green
+            var.changeColor(ring_number, (rgb_color) {val, val, 0});
+        }//end else if
+        else{//gets mroe white
+            var.changeColor(ring_number, (rgb_color) {val, val, val});
+        }//end else
+        Thread::wait(100);//10 times a sec
+    }//end for
 }
 
 int main() {
@@ -1041,6 +1142,7 @@ int main() {
 
     while(1) {
         LOCAL_TIME = time(NULL);            //update local time
+        pc.printf("hello\n\r");
 
         if (downPB == 0) {
             line++;
@@ -1072,45 +1174,41 @@ int main() {
                         }
                     } 
                 } else if (bnum == 'C'){// == !
-                    pc.printf("C\n");
+                    pc.printf("C\n\r");
                     int i = 0;
-                    int r, g, b, w = 0;
                     char value = 0;
                     while (blue.readable()) {
                         pc.printf("i: %d", i);
                         value = blue.getc();
                         pc.printf("%d", value);
                         if (i == 0) {
-                            r = value;
+                            BLUETOOTH_RED = value;
                         } else if (i == 1) {
-                            g = value;
+                            BLUETOOTH_GREEN = value;
                         } else if (i == 2) {
-                            b = value;
-                        } else if (i == 3) {
-                            w = value;
+                            BLUETOOTH_BLUE = value;
                         }
                         i++;
                     }
-                    pc.printf("\n");
-                    pc.printf("Summary R: %d, B: %d, G: %d, W: %d", r, g, b, w); // This shows the value in base 10
+                    pc.printf("\n\r");
+                    pc.printf("Summary R: %d, G: %d, B: %d, W: \n\r", BLUETOOTH_RED, BLUETOOTH_GREEN, BLUETOOTH_BLUE); // This shows the value in base 10
                 }
             } 
         } // if readable
-    
-    
 
-        
         Thread::wait(50); // 50 * 20 * 60 = 60 seconds
         // rewrite the time every 60 seconds
         if (counter == 20 * 60) {
             counter = 0;
-            uLCD.text_width(2.5); 
-            uLCD.text_height(2.5);
-            uLCD.locate(0.5,2.5);
-            //Pull current time and set it to a charArray
-            char curTime[32];
-            strftime(curTime, 32, "%I:%M %p\n", localtime(&LOCAL_TIME));
-            uLCD.printf("%s", curTime);
+            if (page == MAIN) {
+                uLCD.text_width(2.5); 
+                uLCD.text_height(2.5);
+                uLCD.locate(0.5,2.5);
+                //Pull current time and set it to a charArray
+                char curTime[32];
+                strftime(curTime, 32, "%I:%M %p\n", localtime(&LOCAL_TIME));
+                uLCD.printf("%s", curTime);
+            }
         }
         counter++;
         
