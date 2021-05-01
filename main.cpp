@@ -13,6 +13,8 @@ Serial pc(USBTX, USBRX); // tx, rx
 Serial blue(p28,p27);
 Thread thread;
 
+volatile bool sunriseStarted = false;
+
 TI_NEOPIXEL var(p13);
 int ring_number = 12;
 int start = 0;
@@ -1050,32 +1052,34 @@ void led_states() { // thread for all the LED Code
     while (1) {
         int value = CURRENT_MODE;
         switch (value) {
-            /*
             case SLEEP: // sunset code and "go off" at alarm time and every snooze duration
                 led1 = led4 = 1;
                 led3 = led4 = 0;
-                if(inSleep){
+                if(sunriseStarted){
                     var.changeColor(ring_number, (rgb_color) {0,0,0});
                     Thread::wait(500);
                     inSleep = false;               
                 }
                 break;
-            */
             case COLOR_WHEEL: //usse color from COLOR_WHEEL_COLOR or BLUETOOTH (check the USE_BLUETOOTH variable)
+                sunriseStarted = false;
                 led1 = led3 = 1;
                 led2 = led4 = 0;
                 lightColorWheel();
                 break;
             case RAINBOW: // Run through the rainbow
+                sunriseStarted = false;
                 led2 = led4 = 1;
                 led1 = led3 = 0.5;
                 lightRainbow();
                 break;
             case LIGHT_ON: // COLOR = WHITE
+                sunriseStarted = false;
                 led1 = led2 = led3 = led4 = 1;
                 lightOn();
                 break;
             case LIGHT_OFF: // LEDS OFF
+                sunriseStarted = false;
                 led1 = led2 = led3 = led4 = 0;
                 lightOff();
                 break;
@@ -1094,8 +1098,11 @@ void playAlarmSound(){
         Thread::wait(1000);
     }
 }
+bool sunriseStarted = false;
 
 void startSunrise(){
+    
+    sunriseStarted = true;
     
     int maxTime = 60*SUNRISE_AND_SUNSET_DURATION_MIN*10;
     
