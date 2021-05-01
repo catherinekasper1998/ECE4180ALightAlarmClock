@@ -1036,9 +1036,9 @@ int main() {
     thread.start(led_states);
     int counter = 0;
     
-    
-    //testing
-    led1 = 0;
+    //ADD TO MERGE
+    int snoozeCount = 0;
+
     while(1) {
         LOCAL_TIME = time(NULL);            //update local time
 
@@ -1122,6 +1122,7 @@ int main() {
         //pc.printf("Local: %lld\r\n", (long long) LOCAL_TIME);
         //pc.printf("Alarm: %lld\r\n", (long long) ALARM_TIME);
         
+        
         if(LOCAL_TIME%86400 + SUNRISE_AND_SUNSET_DURATION_MIN * 60 > ALARM_TIME && LOCAL_TIME%86400 + SUNRISE_AND_SUNSET_DURATION_MIN * 60 < (ALARM_TIME + 2)){//86400 seconds in 24 hour
             
             pc.printf("doing the alarm\r\n");
@@ -1132,7 +1133,8 @@ int main() {
         }//end if
         
         //start sound alarm
-        if(LOCAL_TIME%86400 > ALARM_TIME && LOCAL_TIME%86400 < (ALARM_TIME + 2)){//86400 seconds in 24 hour
+        //add snooze duration to alarm time determined by how many times the snoozeCount has been incremented
+        if(LOCAL_TIME%86400 > ALARM_TIME + (SNOOZE_DURATION_MIN * 60 * snoozeCount) && LOCAL_TIME%86400 < (ALARM_TIME + 2)  + (SNOOZE_DURATION_MIN * 60 * snoozeCount)){//86400 seconds in 24 hour
              speakerThread.start(playAlarmSound);
              bool notdone = true;
              //play alarm until done
@@ -1151,14 +1153,16 @@ int main() {
                                     Thread::wait(1000);
                                     notdone = false;
                                     speaker = 0;
+                                    //reset snoozeCount to 0 so the alarm will go off at the right time again
+                                    snoozeCount = 0;
                                 }
                                 else if (bnum == '2'){//snooze
                                     speakerThread.terminate();
                                     Thread::wait(1000);
                                     speaker = 0;
-                                    Thread::wait(SNOOZE_DURATION_MIN * 60 * 1000);
-                                    speakerThread.start(playAlarmSound);
-                                    
+                                    //increment the snoozeCounter in for computation in if statement
+                                    snoozeCount++;
+                                    notdone = false;              
                                 }
                             }
                         }
