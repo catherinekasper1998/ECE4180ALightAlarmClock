@@ -16,6 +16,8 @@ Thread thread;
 volatile bool sunriseStarted = false;
 
 TI_NEOPIXEL var(p13);
+Mutex LEDmutex;
+
 int ring_number = 12;
 int start = 0;
 int finish = 12;
@@ -70,9 +72,9 @@ int line = 0; // value from 0 to n-1 where n = the number of lines on the menu p
 
 //Global Settings
 time_t LOCAL_TIME;
-time_t ALARM_TIME = 300;
+time_t ALARM_TIME = 360;
 int SNOOZE_DURATION_MIN = 5;
-int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
+int SUNRISE_AND_SUNSET_DURATION_MIN = 3;
 volatile int CURRENT_MODE = SLEEP;
 int RAINBOW_COLOR = WHITE;
 volatile int COLOR_WHEEL_COLOR = RED; // this is a state variable 
@@ -872,12 +874,6 @@ void updatingMode() {
         } // if readable && == !
     }
     Thread::wait(900);
-    
-    //once selected if in sleep set leds to 0
-    if(CURRENT_MODE == 0){
-        var.changeColor(ring_number, (rgb_color) {0,0,0});
-        Thread::wait(500);
-    }
 }
 
 void updatingColorWheelColor() {
@@ -980,33 +976,42 @@ void selection() {
 void sunrise() {
  for (int i = 1; i<ring_number+1; i++)
     {
+    LEDmutex.lock();
     var.switchLightOff(ring_number);
     var.switchLightOn(ring_number);
     var.changeColor(ring_number, (rgb_color) {20*i,0,0});
+    LEDmutex.unlock();
     Thread::wait(500);
     }  
 }
 
 void lightOn() {
+    LEDmutex.lock();
     var.switchLightOff(ring_number);
     var.switchLightOn(ring_number);
     var.changeColor(ring_number, (rgb_color) {255,255,255});
     Thread::wait(500);
+    LEDmutex.unlock();
 }
 
 void lightRainbow() {
+    LEDmutex.lock();
     var.switchLightOff(ring_number);
     var.switchLightOn(ring_number);
     var.circleRainbow(ring_number);
+    LEDmutex.unlock();
     Thread::wait(500);
 }
 
 void lightOff() {
+    LEDmutex.lock();
     var.changeColor(ring_number, (rgb_color) {0,0,0});
     Thread::wait(500);
+    LEDmutex.unlock();
 }
 
 void lightColorWheel() {
+    LEDmutex.lock();
     if (USE_BLUETOOTH) {
         var.changeColor(ring_number, (rgb_color) {BLUETOOTH_RED, BLUETOOTH_GREEN, BLUETOOTH_BLUE});
     } else {
@@ -1040,25 +1045,28 @@ void lightColorWheel() {
                 break;
         }
     }
+    LEDmutex.unlock();
     Thread::wait(500);
 }
 
 void led_states() { // thread for all the LED Code 
 
     //lights init off
+    /*
     var.changeColor(ring_number, (rgb_color) {0,0,0});
     Thread::wait(500);
-    
+    */
     while (1) {
         int value = CURRENT_MODE;
         switch (value) {
             case SLEEP: // sunset code and "go off" at alarm time and every snooze duration
                 led1 = led4 = 1;
                 led3 = led4 = 0;
-                if(sunriseStarted){
+                if(!sunriseStarted){
+                    LEDmutex.lock();
                     var.changeColor(ring_number, (rgb_color) {0,0,0});
-                    Thread::wait(500);
-                    inSleep = false;               
+                    LEDmutex.unlock();
+                    Thread::wait(500);              
                 }
                 break;
             case COLOR_WHEEL: //usse color from COLOR_WHEEL_COLOR or BLUETOOTH (check the USE_BLUETOOTH variable)
@@ -1098,7 +1106,6 @@ void playAlarmSound(){
         Thread::wait(1000);
     }
 }
-bool sunriseStarted = false;
 
 void startSunrise(){
     
@@ -1108,17 +1115,25 @@ void startSunrise(){
     
     for(int i = 0; i < maxTime; i++){
         int val = 255*((float)i/(float)maxTime);
-        if(i < maxTime/3){//gets mroe red
+        pc.printf("\n\rval: %d", val);
+        if(i < maxTime/3){//gets more red
+            LEDmutex.lock();
             var.changeColor(ring_number, (rgb_color) {val, 0, 0});
+            LEDmutex.unlock();
         }//end if
         else if(i < 2*maxTime/3){//gets more red and green
+            LEDmutex.lock();
             var.changeColor(ring_number, (rgb_color) {val, val, 0});
+            LEDmutex.unlock();
         }//end else if
         else{//gets mroe white
+            LEDmutex.lock();
             var.changeColor(ring_number, (rgb_color) {val, val, val});
+            LEDmutex.unlock();
         }//end else
         Thread::wait(100);//10 times a sec
     }//end for
+    
 }
 
 int main() {
@@ -1149,7 +1164,7 @@ int main() {
 
     while(1) {
         LOCAL_TIME = time(NULL);            //update local time
-        pc.printf("hello\n\r");
+        //pc.printf("hello\n\r");
 
         if (downPB == 0) {
             line++;
@@ -1260,6 +1275,10 @@ int main() {
                                     speaker = 0;
                                     //reset snoozeCount to 0 so the alarm will go off at the right time again
                                     snoozeCount = 0;
+                                    //set leds to 0
+                                    LEDmutex.lock();
+                                    var.changeColor(ring_number, (rgb_color) {0, 0, 0});
+                                    LEDmutex.unlock();
                                 }
                                 else if (bnum == '2'){//snooze
                                     speakerThread.terminate();
