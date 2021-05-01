@@ -17,6 +17,12 @@ TI_NEOPIXEL var(p13);
 int ring_number = 12;
 int start = 0;
 int finish = 12;
+//ADD TO MAIN BRANCH
+Thread speakerThread;
+Thread sunriseThread;
+//speaker
+PwmOut speaker(p21);
+
 
 //mbed LEDs
 DigitalOut led1(LED1);
@@ -63,10 +69,10 @@ int line = 0; // value from 0 to n-1 where n = the number of lines on the menu p
 
 //Global Settings
 time_t LOCAL_TIME;
-time_t ALARM_TIME;
+time_t ALARM_TIME = 300;
 int SNOOZE_DURATION_MIN = 5;
 int SUNRISE_AND_SUNSET_DURATION_MIN = 30;
-volatile int CURRENT_MODE = LIGHT_ON;
+volatile int CURRENT_MODE = SLEEP;
 int RAINBOW_COLOR = WHITE;
 volatile int COLOR_WHEEL_COLOR = RED; // this is a state variable 
 volatile bool USE_BLUETOOTH = false;
@@ -1064,6 +1070,26 @@ void led_states() { // thread for all the LED Code
     }
 }
 
+void playAlarmSound(){
+    while(1){
+        speaker.period(1.0/150.0);
+        speaker=0.1;
+        Thread::wait(1000); 
+        speaker=0;
+        Thread::wait(1000);
+    }
+}
+
+void startSunrise(){
+    /*
+    //Just some sudo code to get started can do more with LEDs hooked up
+    while(1){
+        //as the local time gets closer to the alarm time it gets brighter
+        LED = (LOCAL_TIME%86400) / ALARM_TIME;
+        Thread::wait(1000);//increment every 1 second
+    }
+    */
+}
 
 int main() {
     // ahh
@@ -1088,6 +1114,9 @@ int main() {
     thread.start(led_states);
     int counter = 0;
     
+    //ADD TO MERGE
+    int snoozeCount = 0;
+
     while(1) {
         LOCAL_TIME = time(NULL);            //update local time
         pc.printf("hello\n\r");
@@ -1103,7 +1132,6 @@ int main() {
         } else if (centerPB == 0) {
             selection();
         } else if (blue.readable()){
-            pc.printf("reading\n\r");
             if (blue.getc()=='!') {
                 bnum = blue.getc();
             
@@ -1159,7 +1187,65 @@ int main() {
                 uLCD.printf("%s", curTime);
             }
         }
-        counter++;
+        counter++;s
+        
+        //ADD TO BRANCH
+        //checking if alarm should start
+        //WANT TO START EARLIER FOR SUNRISE
+        //testing
+        //pc.printf("Local/Alarm check\r\n");
+        //pc.printf("Local: %lld\r\n", (long long) LOCAL_TIME);
+        //pc.printf("Alarm: %lld\r\n", (long long) ALARM_TIME);
+        
+        
+        if(LOCAL_TIME%86400 + SUNRISE_AND_SUNSET_DURATION_MIN * 60 > ALARM_TIME && LOCAL_TIME%86400 + SUNRISE_AND_SUNSET_DURATION_MIN * 60 < (ALARM_TIME + 2)){//86400 seconds in 24 hour
+            
+            pc.printf("doing the alarm\r\n");
+           //START SUNRISE FUNCTION CALL
+           sunriseThread.start(startSunrise);
+           //END SUNRISE FUNCTION CALL         
+           //find good way to term the thread 
+        }//end if
+        
+        //start sound alarm
+        //add snooze duration to alarm time determined by how many times the snoozeCount has been incremented
+        if(LOCAL_TIME%86400 > ALARM_TIME + (SNOOZE_DURATION_MIN * 60 * snoozeCount) && LOCAL_TIME%86400 < (ALARM_TIME + 2)  + (SNOOZE_DURATION_MIN * 60 * snoozeCount)){//86400 seconds in 24 hour
+             speakerThread.start(playAlarmSound);
+             bool notdone = true;
+             //play alarm until done
+             while(notdone){
+                 if (blue.readable()){          
+                    if (blue.getc()=='!') {
+        
+                        if (blue.getc()=='B') { //button data
+                            
+                            bnum = blue.getc(); //button number
+             
+                            if (blue.getc() == '0') { // push
+                                //if button 3 is hit stop the alarm and leave the loop
+                                if (bnum == '3') {//sleep button
+                                    speakerThread.terminate();
+                                    Thread::wait(1000);
+                                    notdone = false;
+                                    speaker = 0;
+                                    //reset snoozeCount to 0 so the alarm will go off at the right time again
+                                    snoozeCount = 0;
+                                }
+                                else if (bnum == '2'){//snooze
+                                    speakerThread.terminate();
+                                    Thread::wait(1000);
+                                    speaker = 0;
+                                    //increment the snoozeCounter in for computation in if statement
+                                    snoozeCount++;
+                                    notdone = false;              
+                                }
+                            }
+                        }
+                    }
+                }
+             }//end while
+        }//end if
+
     } // while loop
 
 }
