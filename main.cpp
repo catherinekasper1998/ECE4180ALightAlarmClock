@@ -1,12 +1,20 @@
+/**
+ *  ECE 4180 Final Project: A Light Alarm Clock
+ * Engineers: Catherine Kasper, Trevor Rich, Reed Gore
+ *            & Greyson Gore
+ * Date: 1 May 2021
+ * Description: Our light alarm clock simulated a sunrise
+ * to help wake the user, and offers a number of different
+ * modes. Full details and documentation can be found on
+ * our Github's wiki. 
+* */
+
+
 #include "mbed.h"
 #include "uLCD_4DGL.h"
 #include "rtos.h"
 #include "TI_NEOPIXEL.h"
 
-/*
-Final Project for 4180.
-A light alarm clock with custom sunrise/sunset settings
-*/
 //LCD screen
 uLCD_4DGL uLCD(p9,p10,p11); // serial tx, serial rx, reset pin;
 Serial pc(USBTX, USBRX); // tx, rx
@@ -469,10 +477,10 @@ void updatingAlarm() {
         //flash hour
         uLCD.locate(8,2);   
         uLCD.printf("  ");
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(8,2);
         uLCD.printf("%d", hour);
-        wait(0.15);
+        Thread::wait(150);
             
         if (upPB == 0 | rightPB == 0) {
             hour++;
@@ -509,10 +517,10 @@ void updatingAlarm() {
         //flash hour
         uLCD.locate(11,2);   
         uLCD.printf("  ");
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(11,2);
         uLCD.printf("%d", min);
-        wait(0.15);
+        Thread::wait(150);
             
         if (upPB == 0 | rightPB == 0) {
             min++;
@@ -542,7 +550,7 @@ void updatingAlarm() {
                     } // close if release
                 } // if == B
             }// == !
-        } // if readable && == !
+        } // if readable
     }
     //set am/pm
     notdone = true;
@@ -550,11 +558,11 @@ void updatingAlarm() {
         //flash hour
         uLCD.locate(14,2);   
         uLCD.printf("  ");
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(14,2);
         if(ampm == 0) uLCD.printf("AM");
         else uLCD.printf("PM");
-        wait(0.15);
+        Thread::wait(150);
             
         if (upPB == 0 || rightPB == 0 || downPB == 0 || leftPB == 0) {
             if(ampm == 0)ampm = 1;
@@ -583,7 +591,7 @@ void updatingAlarm() {
     }
     
     ALARM_TIME = hour*3600 + min*60 + ampm*43140;//convert into secs (43140 is seconds from 12am to 11:59am)
-    wait(0.9);
+    Thread::wait(900);
 
 }
 
@@ -605,10 +613,10 @@ void updatingLocal() {
         //flash hour
         uLCD.locate(8,4);   
         uLCD.printf("  ");
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(8,4);
         uLCD.printf("%d", hour);
-        wait(0.15);
+        Thread::wait(150);
 
         if (upPB == 0 | rightPB == 0) {
             hour++;
@@ -647,10 +655,10 @@ void updatingLocal() {
         //flash hour
         uLCD.locate(11,4);   
         uLCD.printf("  ");
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(11,4);
         uLCD.printf("%d", min);
-        wait(0.15);
+        Thread::wait(150);
             
         if (upPB == 0 | rightPB == 0) {
             min++;
@@ -688,11 +696,11 @@ void updatingLocal() {
         //flash hour
         uLCD.locate(14,4);   
         uLCD.printf("  ");
-        wait(0.15);
+        Thread::wait(150);
         uLCD.locate(14,4);
         if(ampm == 0) uLCD.printf("AM");
         else uLCD.printf("PM");
-        wait(0.15);
+        Thread::wait(150);
             
         if (upPB == 0 || rightPB == 0 || downPB == 0 || leftPB == 0) {
             if(ampm == 0)ampm = 1;
@@ -721,7 +729,7 @@ void updatingLocal() {
     
     int timeTemp = hour*3600 + min*60 + ampm*43140;//convert into secs (43140 is seconds from 12am to 11:59am)
     set_time(timeTemp);
-    wait(0.9);
+    Thread::wait(900);
 }
 
 
@@ -918,7 +926,7 @@ void updatingColorWheelColor() {
                     } // close if release
                 } // if == B
             }// == !
-        } // if readable && == !
+        } // if readable
     }
     Thread::wait(900);
     
@@ -1050,12 +1058,7 @@ void lightColorWheel() {
 }
 
 void led_states() { // thread for all the LED Code 
-
     //lights init off
-    /*
-    var.changeColor(ring_number, (rgb_color) {0,0,0});
-    Thread::wait(500);
-    */
     while (1) {
         int value = CURRENT_MODE;
         switch (value) {
@@ -1097,7 +1100,7 @@ void led_states() { // thread for all the LED Code
     }
 }
 
-void playAlarmSound(){
+void playAlarmSound() {
     while(1){
         speaker.period(1.0/150.0);
         speaker=0.1;
@@ -1107,7 +1110,7 @@ void playAlarmSound(){
     }
 }
 
-void startSunrise(){
+void startSunrise() {
     
     sunriseStarted = true;
     
@@ -1116,17 +1119,17 @@ void startSunrise(){
     for(int i = 0; i < maxTime; i++){
         int val = 255*((float)i/(float)maxTime);
         pc.printf("\n\rval: %d", val);
-        if(i < maxTime/3){//gets more red
+        if (i < maxTime/3) {//gets more red
             LEDmutex.lock();
             var.changeColor(ring_number, (rgb_color) {val, 0, 0});
             LEDmutex.unlock();
         }//end if
-        else if(i < 2*maxTime/3){//gets more red and green
+        else if (i < 2*maxTime/3) {//gets more red and green
             LEDmutex.lock();
             var.changeColor(ring_number, (rgb_color) {val, val, 0});
             LEDmutex.unlock();
         }//end else if
-        else{//gets mroe white
+        else {//gets mroe white
             LEDmutex.lock();
             var.changeColor(ring_number, (rgb_color) {val, val, val});
             LEDmutex.unlock();
@@ -1151,7 +1154,7 @@ int main() {
     rightPB.mode(PullUp);
     centerPB.mode(PullUp);
 
-    Thread::wait(1.0);
+    Thread::wait(200);
     homeScreen();
     
     char bnum=0;
