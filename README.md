@@ -1,4 +1,4 @@
-# ECE4180
+# ECE 4180 A Light Alarm Clock
 Please see the Wiki Tab for our complete documentation. 
 
 Project Description:
