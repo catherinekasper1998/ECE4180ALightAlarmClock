@@ -1037,6 +1037,37 @@ void lightColorWheel() {
     Thread::wait(500);
 }
 
+void playAlarmSound(){
+    while(1){
+        speaker.period(1.0/150.0);
+        speaker=0.1;
+        Thread::wait(1000); 
+        speaker=0;
+        Thread::wait(1000);
+    }
+}
+
+void startSunrise(){
+    /*
+    //Just some sudo code to get started can do more with LEDs hooked up
+    while(1){
+        //as the local time gets closer to the alarm time it gets brighter
+        LED = (LOCAL_TIME%86400) / ALARM_TIME;
+        Thread::wait(1000);//increment every 1 second
+    }
+    */
+}
+
+void beginSunrise() {
+    if ( /** IF INSIDE SUNRISE TIME **/) {
+        bool skipped = false;
+        if (int i = 0; i < /** IF INSIDE SUNRISE TIME **/; i++) {
+            if (i/ (maxTime/3) )
+        }
+
+    }
+}
+
 void led_states() { // thread for all the LED Code 
     while (1) {
         int value = CURRENT_MODE;
@@ -1044,7 +1075,7 @@ void led_states() { // thread for all the LED Code
             case SLEEP: // sunset code and "go off" at alarm time and every snooze duration
                 led1 = led4 = 1;
                 led3 = led4 = 0;
-                sunrise();
+                beginSunrise();
                 break;
             case COLOR_WHEEL: //usse color from COLOR_WHEEL_COLOR or BLUETOOTH (check the USE_BLUETOOTH variable)
                 led1 = led3 = 1;
@@ -1068,27 +1099,6 @@ void led_states() { // thread for all the LED Code
                 break;
         }
     }
-}
-
-void playAlarmSound(){
-    while(1){
-        speaker.period(1.0/150.0);
-        speaker=0.1;
-        Thread::wait(1000); 
-        speaker=0;
-        Thread::wait(1000);
-    }
-}
-
-void startSunrise(){
-    /*
-    //Just some sudo code to get started can do more with LEDs hooked up
-    while(1){
-        //as the local time gets closer to the alarm time it gets brighter
-        LED = (LOCAL_TIME%86400) / ALARM_TIME;
-        Thread::wait(1000);//increment every 1 second
-    }
-    */
 }
 
 int main() {
